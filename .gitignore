@@ -1,0 +1,71 @@
+# Python
+*.py[cod]
+*$py.class
+*.so
+__pycache__/
+*.egg-info/
+dist/
+build/
+*.egg
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Virtual Environments
+venv/
+env/
+ENV/
+.venv
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb
+
+# Environment Variables
+.env
+.env.local
+
+# Data Files (generated outputs)
+*.csv
+*.json
+*.gz
+*.zip
+*.parquet
+*.pickle
+*.pkl
+
+# Exceptions - keep specific data files if needed
+!requirements.txt
+!data/gold_standard/README.md
+!data/gold_standard/india_commerce/README.md
+!monte_carlo_simulation/README.md
+!monte_carlo_simulation/WEEKLY_FORECAST_GUIDE.md
+!scripts/data_collection/QUICKSTART.md
+
+# Reports and Results
+*_report.txt
+*_results.txt
+nul
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+temp/
+tmp/

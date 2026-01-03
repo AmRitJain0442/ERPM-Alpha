@@ -1,0 +1,15 @@
+# Gold Standard Data Collection Requirements
+
+# Core dependencies
+requests>=2.31.0
+pandas>=2.0.0
+beautifulsoup4>=4.12.0
+
+# Optional but recommended
+openpyxl>=3.1.0  # For Excel file support (India Commerce data)
+matplotlib>=3.7.0  # For data visualization
+numpy>=1.24.0  # For numerical operations
+
+# Development/Testing
+pytest>=7.4.0
+python-dotenv>=1.0.0  # For managing API keys in .env file

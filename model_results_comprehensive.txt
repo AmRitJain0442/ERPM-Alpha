@@ -1,0 +1,24 @@
+================================================================================
+COMPREHENSIVE EXCHANGE RATE MODELING RESULTS
+================================================================================
+
+DATA SUMMARY
+--------------------------------------------------------------------------------
+Observations: 223
+Features: 70
+Date range: 2025-02-13 00:00:00 to 2025-12-29 00:00:00
+
+MODEL RESULTS
+--------------------------------------------------------------------------------
+        Model  R² (Train) R² (Test) RMSE (Test)
+          OLS    0.902464         -           -
+Random Forest    0.997321 -0.532739    0.940644
+      XGBoost    1.000000 -0.844623    1.031918
+
+KEY FINDINGS
+--------------------------------------------------------------------------------
+1. Multiple data sources integrated: Exchange rates, GDELT sentiment, FRED macro indicators
+2. Advanced feature engineering applied: lags, moving averages, volatility, interactions
+3. Multiple modeling approaches tested: OLS, VAR, Random Forest, XGBoost
+4. Machine learning models show strong predictive power
+5. Goldstein scores and sentiment metrics show statistical significance

@@ -116,45 +116,45 @@ print("Saved danger_signals_timeline.png")
 print("Saved danger_signals_timeline.png")
 # plt.show()
 
-# --- STEP 5: THRESHOLD OPTIMIZATION ---
-print("\n--- STEP 5: TUNING THE TRIGGER ---")
+# --- STEP 5 (CORRECTED): MAXIMIZE F1-SCORE ---
+print("\n--- STEP 5: BALANCING THE TRIGGER (F1-MAXIMIZATION) ---")
 
-# Get the probabilities again (0.0 to 1.0)
+# Get probabilities
 y_probs = clf.predict_proba(X_test)[:, 1]
 
-# Calculate Precision & Recall for ALL possible thresholds
+# Get all precision-recall pairs
 precisions, recalls, thresholds = precision_recall_curve(y_test, y_probs)
 
-# We want to find the threshold that gives us at least 60% Recall (Catch 60% of crashes)
-# while keeping Precision as high as possible.
-target_recall = 0.60
-# Handle case where no threshold meets the criteria
-if np.any(recalls >= target_recall):
-    optimal_idx = np.argmax(recalls >= target_recall) # Finds the first index where recall >= 0.60
-    optimal_threshold = thresholds[optimal_idx]
-else:
-    print("Warning: Target recall not met. Using default threshold 0.5")
-    optimal_threshold = 0.5
+# Calculate F1 Score for each threshold
+# F1 = 2 * (Precision * Recall) / (Precision + Recall)
+f1_scores = 2 * (precisions * recalls) / (precisions + recalls)
+# Handle NaNs if precision+recall is 0
+f1_scores = np.nan_to_num(f1_scores)
 
-print(f"Optimal Threshold found: {optimal_threshold:.4f}")
+# Find the index of the best F1 score
+best_idx = np.argmax(f1_scores)
+optimal_threshold = thresholds[best_idx]
+
+print(f"Best F1 Score: {f1_scores[best_idx]:.4f}")
+print(f"Optimal Threshold: {optimal_threshold:.4f}")
 
 # Apply new threshold
-y_pred_new = (y_probs >= optimal_threshold).astype(int)
+y_pred_tuned = (y_probs >= optimal_threshold).astype(int)
 
-print("\n=== TUNED CLASSIFICATION REPORT ===")
-print(classification_report(y_test, y_pred_new))
+print("\n=== BALANCED CLASSIFICATION REPORT ===")
+print(classification_report(y_test, y_pred_tuned))
 
 # Visual Check
-new_conf_mat = confusion_matrix(y_test, y_pred_new)
+new_conf_mat = confusion_matrix(y_test, y_pred_tuned)
 plt.figure(figsize=(6, 5))
-sns.heatmap(new_conf_mat, annot=True, fmt='d', cmap='Reds',
+sns.heatmap(new_conf_mat, annot=True, fmt='d', cmap='Greens', # Changed color to distinguish
             xticklabels=['Pred Safe', 'Pred Danger'],
             yticklabels=['Actual Safe', 'Actual Danger'])
-plt.title(f'Confusion Matrix @ Threshold {optimal_threshold:.2f}\n(Did we catch more crashes?)')
+plt.title(f'Balanced Matrix @ Threshold {optimal_threshold:.2f}')
 plt.ylabel('Actual')
 plt.xlabel('Predicted')
-plt.savefig('tuned_confusion_matrix.png')
-print("Saved tuned_confusion_matrix.png")
+plt.savefig('balanced_confusion_matrix.png')
+print("Saved balanced_confusion_matrix.png")
 # plt.show()
 
 # Save Model

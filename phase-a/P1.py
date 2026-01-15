@@ -67,7 +67,8 @@ for i in range(K):
     plt.grid(True)
 
 plt.tight_layout()
-# plt.show() # Commenting out show to run in background
+plt.show() 
+plt.savefig('decomposition.png')  # Commenting out show to run in background
 
 print("Decomposition Complete. You now have 3 separate datasets in variable 'u'.")
 

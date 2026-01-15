@@ -1,0 +1,52 @@
+"""
+Instructions for converting RESEARCH_PRESENTATION.md to PDF
+
+The Markdown PDF extension has been installed in VS Code.
+
+To convert your markdown file to PDF with all images intact:
+
+Method 1: Using VS Code Command Palette
+----------------------------------------
+1. Open RESEARCH_PRESENTATION.md in VS Code (it's already open)
+2. Press Ctrl+Shift+P (or Cmd+Shift+P on Mac)
+3. Type "Markdown PDF: Export (pdf)"
+4. Press Enter
+
+The PDF will be created in the same directory as the markdown file.
+
+Method 2: Using Right-Click Context Menu
+----------------------------------------
+1. Right-click on RESEARCH_PRESENTATION.md in the file explorer
+2. Select "Markdown PDF: Export (pdf)"
+
+The PDF will be generated automatically with all images included.
+
+Method 3: Using Keyboard Shortcut
+---------------------------------
+1. Open RESEARCH_PRESENTATION.md
+2. The extension may provide a keyboard shortcut (check command palette)
+
+Configuration (Optional):
+------------------------
+You can configure the PDF output in VS Code settings:
+- File > Preferences > Settings
+- Search for "markdown-pdf"
+- Adjust settings like:
+  - Page format (A4, Letter, etc.)
+  - Margins
+  - Header/Footer
+  - Image quality
+
+The Markdown PDF extension automatically:
+✓ Converts all markdown syntax to formatted PDF
+✓ Includes all images (relative and absolute paths)
+✓ Preserves tables, code blocks, and formatting
+✓ Creates bookmarks for headers
+✓ Maintains links and references
+
+Note: The first conversion may take a moment as it renders all images.
+      Subsequent conversions will be faster.
+"""
+
+if __name__ == "__main__":
+    print(__doc__)

@@ -1,0 +1,30 @@
+# India-USA Trade Data Analysis Dependencies
+
+# Core data processing
+pandas>=1.5.0
+numpy>=1.21.0
+
+# HTTP requests for API calls
+requests>=2.28.0
+
+# UN Comtrade data wrapper (Option 2)
+world_trade_data>=0.1.0
+
+# Data visualization (optional but recommended)
+matplotlib>=3.5.0
+seaborn>=0.12.0
+plotly>=5.10.0
+
+# Jupyter support (optional)
+jupyter>=1.0.0
+notebook>=6.5.0
+
+# Excel export support
+openpyxl>=3.0.0
+xlsxwriter>=3.0.0
+
+# Progress bars for long operations
+tqdm>=4.64.0
+
+# Environment variable management
+python-dotenv>=0.21.0

@@ -1,0 +1,53 @@
+================================================================================
+SAMPLE DATASETS - MONTE_CARLO_FORECASTS
+================================================================================
+
+This folder contains sample data (first 500 rows) from each dataset.
+These samples are for quick preview and analysis.
+
+--------------------------------------------------------------------------------
+FILE STATISTICS:
+--------------------------------------------------------------------------------
+
+📄 monte_carlo_forecast.csv
+   Sample Rows: 31
+   Total Rows: 31
+   File Size: 0.0 MB
+   Columns: Day, Mean, Median, 5th_Percentile, 25th_Percentile ... (+2 more)
+
+📄 monte_carlo_statistics.csv
+   Sample Rows: 4
+   Total Rows: 4
+   File Size: 0.0 MB
+   Columns: Model, Mean, Median, Std, 5th Percentile ... (+5 more)
+
+📄 weekly_forecast_summary.csv
+   Sample Rows: 4
+   Total Rows: 4
+   File Size: 0.0 MB
+   Columns: Week, Start_Date, End_Date, Mean, Median ... (+11 more)
+
+📄 week_1_detailed_results.csv
+   Sample Rows: 500
+   Total Rows: 10000
+   File Size: 0.41 MB
+   Columns: Simulation, Final_Price, Return_%
+
+📄 week_2_detailed_results.csv
+   Sample Rows: 500
+   Total Rows: 10000
+   File Size: 0.41 MB
+   Columns: Simulation, Final_Price, Return_%
+
+📄 week_3_detailed_results.csv
+   Sample Rows: 500
+   Total Rows: 10000
+   File Size: 0.41 MB
+   Columns: Simulation, Final_Price, Return_%
+
+📄 week_4_detailed_results.csv
+   Sample Rows: 500
+   Total Rows: 10000
+   File Size: 0.41 MB
+   Columns: Simulation, Final_Price, Return_%
+

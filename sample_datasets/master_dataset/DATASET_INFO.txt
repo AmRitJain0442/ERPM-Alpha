@@ -1,0 +1,17 @@
+================================================================================
+SAMPLE DATASETS - MASTER_DATASET
+================================================================================
+
+This folder contains sample data (first 500 rows) from each dataset.
+These samples are for quick preview and analysis.
+
+--------------------------------------------------------------------------------
+FILE STATISTICS:
+--------------------------------------------------------------------------------
+
+📄 Super_Master_Dataset.csv
+   Sample Rows: 500
+   Total Rows: 1825
+   File Size: 0.46 MB
+   Columns: Date, INR, OIL, GOLD, US10Y ... (+11 more)
+

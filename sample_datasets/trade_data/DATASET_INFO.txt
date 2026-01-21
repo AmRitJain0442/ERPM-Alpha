@@ -1,0 +1,71 @@
+================================================================================
+SAMPLE DATASETS - TRADE_DATA
+================================================================================
+
+This folder contains sample data (first 500 rows) from each dataset.
+These samples are for quick preview and analysis.
+
+--------------------------------------------------------------------------------
+FILE STATISTICS:
+--------------------------------------------------------------------------------
+
+📄 india_usa_trade_2010_2025.csv
+   Sample Rows: 30
+   Total Rows: 30
+   File Size: 0.0 MB
+   Columns: CTY_CODE, CTY_NAME, ALL_VAL_YR, ALL_VAL_MO, YEAR ... (+5 more)
+
+📄 india_usa_trade_2019_2023.csv
+   Sample Rows: 10
+   Total Rows: 10
+   File Size: 0.0 MB
+   Columns: CTY_CODE, CTY_NAME, ALL_VAL_YR, ALL_VAL_MO, YEAR ... (+5 more)
+
+📄 india_usa_trade_2022_2023.csv
+   Sample Rows: 4
+   Total Rows: 4
+   File Size: 0.0 MB
+   Columns: CTY_CODE, CTY_NAME, ALL_VAL_YR, ALL_VAL_MO, YEAR ... (+5 more)
+
+📄 india_usa_trade_2023_2023.csv
+   Sample Rows: 2
+   Total Rows: 2
+   File Size: 0.0 MB
+   Columns: CTY_CODE, CTY_NAME, ALL_VAL_YR, ALL_VAL_MO, YEAR ... (+5 more)
+
+📄 trade_balance_analysis.csv
+   Sample Rows: 15
+   Total Rows: 15
+   File Size: 0.0 MB
+   Columns: fetch_year, exports, imports, trade_balance, surplus_deficit
+
+📄 commodity_shift_multiyear.csv
+   Sample Rows: 10
+   Total Rows: 10
+   File Size: 0.0 MB
+   Columns: fetch_year, Organic Chemicals, Pharmaceuticals, Apparel, Gems & Jewelry ... (+2 more)
+
+📄 commodity_analysis_2023.csv
+   Sample Rows: 7
+   Total Rows: 7
+   File Size: 0.0 MB
+   Columns: CTY_CODE, CTY_NAME, ALL_VAL_YR, HS_CODE, COMMODITY_DESC ... (+6 more)
+
+📄 commodity_analysis_2024.csv
+   Sample Rows: 7
+   Total Rows: 7
+   File Size: 0.0 MB
+   Columns: CTY_CODE, CTY_NAME, ALL_VAL_YR, HS_CODE, COMMODITY_DESC ... (+6 more)
+
+📄 seasonality_analysis_2023.csv
+   Sample Rows: 24
+   Total Rows: 24
+   File Size: 0.0 MB
+   Columns: CTY_CODE, CTY_NAME, ALL_VAL_YR, ALL_VAL_MO, YEAR ... (+6 more)
+
+📄 seasonality_analysis_2024.csv
+   Sample Rows: 24
+   Total Rows: 24
+   File Size: 0.0 MB
+   Columns: CTY_CODE, CTY_NAME, ALL_VAL_YR, ALL_VAL_MO, YEAR ... (+6 more)
+

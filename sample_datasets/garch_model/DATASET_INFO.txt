@@ -1,0 +1,29 @@
+================================================================================
+SAMPLE DATASETS - GARCH_MODEL
+================================================================================
+
+This folder contains sample data (first 500 rows) from each dataset.
+These samples are for quick preview and analysis.
+
+--------------------------------------------------------------------------------
+FILE STATISTICS:
+--------------------------------------------------------------------------------
+
+📄 predictions_price.csv
+   Sample Rows: 51
+   Total Rows: 51
+   File Size: 0.0 MB
+   Columns: Date, Actual, Predicted, Error
+
+📄 feature_importance.csv
+   Sample Rows: 28
+   Total Rows: 28
+   File Size: 0.0 MB
+   Columns: Feature, Importance
+
+📄 garch_comparison.csv
+   Sample Rows: 3
+   Total Rows: 3
+   File Size: 0.0 MB
+   Columns: Model, Log-Likelihood, AIC, BIC, Persistence ... (+1 more)
+

@@ -1,0 +1,47 @@
+================================================================================
+SAMPLE DATASETS - GDELT_NEWS
+================================================================================
+
+This folder contains sample data (first 500 rows) from each dataset.
+These samples are for quick preview and analysis.
+
+--------------------------------------------------------------------------------
+FILE STATISTICS:
+--------------------------------------------------------------------------------
+
+📄 combined-gdelt.csv
+   Sample Rows: 500
+   Total Rows: 5129
+   File Size: 0.38 MB
+   Columns: Date, Country, Avg_Tone, Avg_Stability, Total_Mentions ... (+1 more)
+
+📄 india_news_combined_sorted.csv
+   Sample Rows: 500
+   Total Rows: 432509
+   File Size: 172.61 MB
+   Columns: GLOBALEVENTID, SQLDATE, MonthYear, Year, FractionDate ... (+56 more)
+
+📄 india_news_gz_combined_sorted.csv
+   Sample Rows: 500
+   Total Rows: 2546999
+   File Size: 1036.39 MB
+   Columns: GLOBALEVENTID, SQLDATE, MonthYear, Year, FractionDate ... (+56 more)
+
+📄 usa_news_combined_sorted.csv
+   Sample Rows: 500
+   Total Rows: 14377323
+   File Size: 5876.96 MB
+   Columns: GLOBALEVENTID, SQLDATE, MonthYear, Year, FractionDate ... (+56 more)
+
+📄 india_financial_political_news_filtered.csv
+   Sample Rows: 500
+   Total Rows: 1511637
+   File Size: 627.04 MB
+   Columns: GLOBALEVENTID, SQLDATE, MonthYear, Year, FractionDate ... (+56 more)
+
+📄 india_daily_goldstein_averages.csv
+   Sample Rows: 109
+   Total Rows: 109
+   File Size: 0.0 MB
+   Columns: Date, India_Avg_Goldstein, India_Event_Count
+

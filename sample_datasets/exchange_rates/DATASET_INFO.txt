@@ -1,0 +1,34 @@
+================================================================================
+SAMPLE DATASETS - EXCHANGE_RATES
+================================================================================
+
+This folder contains sample data (first 500 rows) from each dataset.
+These samples are for quick preview and analysis.
+
+--------------------------------------------------------------------------------
+FILE STATISTICS:
+--------------------------------------------------------------------------------
+
+📄 usd_inr_exchange_rates_1year.csv
+   Sample Rows: 255
+   Total Rows: 255
+   File Size: 0.0 MB
+   Columns: Date, USD_to_INR
+
+📄 usd_inr_exchange_rates_1year.json
+   Sample Rows: N/A
+   Total Rows: N/A
+   File Size: 0.02 MB
+
+📄 exchange_rate_goldstein_merged.csv
+   Sample Rows: 252
+   Total Rows: 252
+   File Size: 0.02 MB
+   Columns: Date, USD_to_INR, Goldstein_Mean, Goldstein_Median, Goldstein_Sum ... (+3 more)
+
+📄 combined_goldstein_exchange_rates.csv
+   Sample Rows: 253
+   Total Rows: 253
+   File Size: 0.05 MB
+   Columns: Date, USA_Avg_Goldstein, USA_Event_Count, India_Avg_Goldstein, India_Event_Count ... (+8 more)
+

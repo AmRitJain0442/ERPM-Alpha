@@ -1,0 +1,35 @@
+================================================================================
+SAMPLE DATASETS - CORRELATION_ANALYSIS
+================================================================================
+
+This folder contains sample data (first 500 rows) from each dataset.
+These samples are for quick preview and analysis.
+
+--------------------------------------------------------------------------------
+FILE STATISTICS:
+--------------------------------------------------------------------------------
+
+📄 goldstein_exchange_correlations.csv
+   Sample Rows: 21
+   Total Rows: 21
+   File Size: 0.0 MB
+   Columns: Unnamed: 0, correlation, p_value
+
+📄 political_news_exchange_merged.csv
+   Sample Rows: 252
+   Total Rows: 252
+   File Size: 0.03 MB
+   Columns: Date, GoldsteinScale_mean, GoldsteinScale_std, Event_count, AvgTone_mean ... (+4 more)
+
+📄 bq-results-20260115-090715-1768468077035.csv
+   Sample Rows: 500
+   Total Rows: 2204
+   File Size: 0.13 MB
+   Columns: Date, US_Avg_Tone, US_Avg_Stability, US_Total_Mentions, US_Event_Count ... (+1 more)
+
+📄 IMF_3.csv
+   Sample Rows: 500
+   Total Rows: 518
+   File Size: 0.02 MB
+   Columns: Date, IMF_3
+

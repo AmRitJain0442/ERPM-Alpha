@@ -62,8 +62,8 @@ OUTPUT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'output')
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 # Gemini API Configuration
-GEMINI_API_KEY = "AIzaSyB08g5ToCYmiN6-LrrHsmCKGdNQlJiBnDM"
-GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent"
+GEMINI_API_KEY = "AIzaSyCLRRUW4uDP4km_aHYBCehNaZpD7dsQnMg"
+GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent"
 
 
 # =============================================================================
@@ -159,25 +159,21 @@ USA-INDIA BILATERAL SENTIMENT:
 - Combined Weighted Average: {recent_gs['Combined_Weighted_Avg'].mean():.3f}
 """
 
-    prompt = f"""You are a financial analyst specializing in currency markets. Based on the following GDELT news analytics data, provide a brief analysis for USD/INR exchange rate outlook.
+    prompt = f"""You are a financial analyst specializing in currency markets. Analyze the following GDELT news analytics data for USD/INR exchange rate outlook.
 
 {summary}
 
-Please provide:
-1. SHORT-TERM OUTLOOK (1-7 days): Will USD/INR likely increase, decrease, or stay stable? Confidence level?
-2. KEY RISK FACTORS: What news trends could impact the exchange rate?
-3. SENTIMENT SCORE: On a scale of -1 (very bearish for INR) to +1 (very bullish for INR), what is your assessment?
-4. VOLATILITY EXPECTATION: Low, Medium, or High?
+Provide your analysis in EXACTLY this format (do not add any extra text before or after):
 
-Be concise and data-driven. Format your response as:
-OUTLOOK: [increase/decrease/stable]
-CONFIDENCE: [low/medium/high]
-SENTIMENT_SCORE: [number between -1 and 1]
-VOLATILITY: [low/medium/high]
-REASONING: [2-3 sentences]
-"""
+OUTLOOK: [choose one: increase/decrease/stable]
+CONFIDENCE: [choose one: low/medium/high]
+SENTIMENT_SCORE: [provide a number between -1.0 and 1.0, where -1 is very bearish for INR, 0 is neutral, +1 is very bullish for INR]
+VOLATILITY: [choose one: low/medium/high]
+REASONING: [Provide 2-3 concise sentences explaining your outlook based on the data. Focus on the most significant trends in tone, sentiment, and news volume that support your conclusion.]
 
-    response = call_gemini_api(prompt, max_tokens=500)
+Be data-driven and concise. Use the exact format above."""
+
+    response = call_gemini_api(prompt, max_tokens=1000)
 
     if response:
         # Parse the response
@@ -186,34 +182,64 @@ REASONING: [2-3 sentences]
             'confidence': 'medium',
             'sentiment_score': 0.0,
             'volatility': 'medium',
-            'reasoning': response,
+            'reasoning': '',
             'raw_response': response
         }
 
         # Try to extract structured data
-        lines = response.upper().split('\n')
+        lines = response.split('\n')
+        reasoning_lines = []
+        
         for line in lines:
-            if 'OUTLOOK:' in line:
-                if 'INCREASE' in line:
+            line_upper = line.upper()
+            if 'OUTLOOK:' in line_upper:
+                value = line.split(':', 1)[1].strip().lower()
+                if 'increase' in value or 'rise' in value or 'strengthen' in value:
                     result['outlook'] = 'increase'
-                elif 'DECREASE' in line:
+                elif 'decrease' in value or 'fall' in value or 'weaken' in value or 'decline' in value:
                     result['outlook'] = 'decrease'
-            elif 'CONFIDENCE:' in line:
-                if 'HIGH' in line:
+                else:
+                    result['outlook'] = 'stable'
+            elif 'CONFIDENCE:' in line_upper:
+                value = line.split(':', 1)[1].strip().lower()
+                if 'high' in value:
                     result['confidence'] = 'high'
-                elif 'LOW' in line:
+                elif 'low' in value:
                     result['confidence'] = 'low'
-            elif 'SENTIMENT_SCORE:' in line:
+                else:
+                    result['confidence'] = 'medium'
+            elif 'SENTIMENT_SCORE:' in line_upper or 'SENTIMENT SCORE:' in line_upper:
                 try:
-                    score = float(line.split(':')[1].strip().split()[0])
-                    result['sentiment_score'] = max(-1, min(1, score))
+                    value = line.split(':', 1)[1].strip()
+                    # Extract number using regex
+                    import re
+                    numbers = re.findall(r'-?\d+\.?\d*', value)
+                    if numbers:
+                        score = float(numbers[0])
+                        result['sentiment_score'] = max(-1, min(1, score))
                 except:
                     pass
-            elif 'VOLATILITY:' in line:
-                if 'HIGH' in line:
+            elif 'VOLATILITY:' in line_upper:
+                value = line.split(':', 1)[1].strip().lower()
+                if 'high' in value:
                     result['volatility'] = 'high'
-                elif 'LOW' in line:
+                elif 'low' in value:
                     result['volatility'] = 'low'
+                else:
+                    result['volatility'] = 'medium'
+            elif 'REASONING:' in line_upper:
+                reasoning_lines.append(line.split(':', 1)[1].strip())
+            elif reasoning_lines:
+                # Continue collecting reasoning lines
+                reasoning_lines.append(line.strip())
+        
+        # Set reasoning or use first few lines of response
+        if reasoning_lines:
+            result['reasoning'] = ' '.join(reasoning_lines).strip()
+        
+        # If no proper reasoning was extracted, create a summary from the data
+        if not result['reasoning'] or len(result['reasoning']) < 10:
+            result['reasoning'] = f"Based on GDELT analysis: {result['outlook']} outlook with {result['confidence']} confidence. Sentiment score: {result['sentiment_score']:.2f}. Expected {result['volatility']} volatility in short-term movements."
 
         return result
     else:
@@ -237,29 +263,33 @@ def load_all_data():
     print("  LOADING DATA")
     print("=" * 70)
 
-    base_dir = os.path.dirname(OUTPUT_DIR)
+    base_dir = os.path.dirname(OUTPUT_DIR)  # This is ensemble_model folder
+    parent_dir = os.path.dirname(base_dir)  # This is gdelt_india folder
 
     # Exchange rates
     rate_path = os.path.join(OUTPUT_DIR, 'usd_inr_10year.csv')
     if not os.path.exists(rate_path):
-        rate_path = os.path.join(base_dir, 'usd_inr_exchange_rates_1year.csv')
+        rate_path = os.path.join(parent_dir, 'usd_inr_exchange_rates_1year.csv')
     rate_df = pd.read_csv(rate_path, parse_dates=['Date'])
     print(f"Exchange rates: {len(rate_df)} observations")
 
     # GDELT
-    gdelt_path = os.path.join(base_dir, 'Phase-B', 'merged_training_data.csv')
-    gdelt_df = pd.read_csv(gdelt_path, parse_dates=['Date']) if os.path.exists(gdelt_path) else None
-    if gdelt_df is not None:
-        print(f"GDELT: {len(gdelt_df)} observations")
+    gdelt_path = os.path.join(parent_dir, 'Phase-B', 'merged_training_data.csv')
+    if os.path.exists(gdelt_path):
+        gdelt_df = pd.read_csv(gdelt_path, parse_dates=['Date'])
+        print(f"GDELT: {len(gdelt_df)} observations (from {gdelt_df['Date'].min()} to {gdelt_df['Date'].max()})")
+    else:
+        gdelt_df = None
+        print(f"GDELT: Not found at {gdelt_path}")
 
     # Goldstein
-    goldstein_path = os.path.join(base_dir, 'combined_goldstein_exchange_rates.csv')
+    goldstein_path = os.path.join(parent_dir, 'combined_goldstein_exchange_rates.csv')
     goldstein_df = pd.read_csv(goldstein_path, parse_dates=['Date']) if os.path.exists(goldstein_path) else None
     if goldstein_df is not None:
         print(f"Goldstein: {len(goldstein_df)} observations")
 
     # Trade balance
-    trade_path = os.path.join(base_dir, 'india_usa_trade', 'output', 'trade_balance_analysis.csv')
+    trade_path = os.path.join(parent_dir, 'india_usa_trade', 'output', 'trade_balance_analysis.csv')
     trade_df = pd.read_csv(trade_path) if os.path.exists(trade_path) else None
     if trade_df is not None:
         print(f"Trade: {len(trade_df)} years")
@@ -853,8 +883,9 @@ def main():
         gdelt_features, feature_cols = build_gdelt_features(gdelt_df, goldstein_df)
 
         # Merge with price data
+        recent_df = recent.reset_index().rename(columns={'index': 'Date', price_series.name or 0: 'USD_to_INR'})
         merged = pd.merge(
-            recent.reset_index().rename(columns={'index': 'Date'}),
+            recent_df,
             gdelt_features[['Date'] + feature_cols],
             on='Date',
             how='left'

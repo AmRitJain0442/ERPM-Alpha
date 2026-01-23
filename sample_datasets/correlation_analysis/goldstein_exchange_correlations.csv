@@ -1,0 +1,22 @@
+Unnamed: 0,correlation,p_value
+USA_Avg_Goldstein vs USD_to_INR,-0.08559199632032,0.1755888735487663
+USA_Avg_Goldstein vs Exchange_Rate_Change,-0.0246640871041542,0.6968005747306563
+USA_Avg_Goldstein vs Exchange_Rate_Change_Abs,-0.0237401057959483,0.7076294358430836
+India_Avg_Goldstein vs USD_to_INR,0.550285950782015,2.380119959958037e-21
+India_Avg_Goldstein vs Exchange_Rate_Change,-0.0076717630663776,0.9035470645413952
+India_Avg_Goldstein vs Exchange_Rate_Change_Abs,-0.0075120922008314,0.9055450730467792
+Combined_Simple_Avg vs USD_to_INR,0.2005482204090836,0.0013725967805098
+Combined_Simple_Avg vs Exchange_Rate_Change,-0.0264426487914109,0.6761297896211583
+Combined_Simple_Avg vs Exchange_Rate_Change_Abs,-0.0255167587754365,0.6868615805873406
+Combined_Weighted_Avg vs USD_to_INR,-0.0174152009458771,0.7832362216277986
+Combined_Weighted_Avg vs Exchange_Rate_Change,-0.0041980944365558,0.9471297089338824
+Combined_Weighted_Avg vs Exchange_Rate_Change_Abs,-0.0033994874667464,0.9571765348100992
+Combined_Product vs USD_to_INR,0.3352986644549313,4.898258824888131e-08
+Combined_Product vs Exchange_Rate_Change,-0.0119359773161694,0.850451433745569
+Combined_Product vs Exchange_Rate_Change_Abs,-0.0107543556657456,0.8651074584958033
+Combined_Geometric_Mean vs USD_to_INR,0.2459322072923152,7.966408623845603e-05
+Combined_Geometric_Mean vs Exchange_Rate_Change,0.0018648644538691,0.9765003919357164
+Combined_Geometric_Mean vs Exchange_Rate_Change_Abs,0.0024675314286953,0.9689093945995412
+USA_India_Sentiment_Diff vs USD_to_INR,-0.3278870918137319,9.975670616163897e-08
+USA_India_Sentiment_Diff vs Exchange_Rate_Change,-0.0171412485122332,0.7865633629772936
+USA_India_Sentiment_Diff vs Exchange_Rate_Change_Abs,-0.0164396656399854,0.7951016054171044

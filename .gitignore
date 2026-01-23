@@ -49,6 +49,7 @@ ENV/
 !monte_carlo_simulation/README.md
 !monte_carlo_simulation/WEEKLY_FORECAST_GUIDE.md
 !scripts/data_collection/QUICKSTART.md
+!sample_datasets/**/*.csv
 
 # Reports and Results
 *_report.txt

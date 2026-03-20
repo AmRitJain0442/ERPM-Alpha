@@ -1,0 +1,172 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\citation{bis2022}
+\citation{rossi2013}
+\citation{meese1983}
+\citation{engel2014}
+\citation{tetlock2007,bollen2011,sawhney2021}
+\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}{section.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.1}Background \& Motivation}{1}{subsection.1.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.2}Problem Statement}{1}{subsection.1.2}\protected@file@percent }
+\citation{meese1983}
+\citation{tetlock2007}
+\citation{bollen2011}
+\citation{galeshchuk2016}
+\citation{sezer2020}
+\citation{wu2020sentiment}
+\citation{xie2023}
+\citation{li2024llm}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.3}Existing Work \& Research Gaps}{2}{subsection.1.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.4}Proposed Approach}{2}{subsection.1.4}\protected@file@percent }
+\citation{tetlock2007}
+\citation{bollen2011}
+\citation{baker2007}
+\citation{wu2020sentiment}
+\citation{nassirtoussi2014}
+\citation{meese1983}
+\citation{rossi2013}
+\citation{bollerslev1986}
+\citation{nelson1991}
+\citation{chen2016xgboost}
+\citation{sezer2020}
+\citation{dragomiretskiy2014}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.5}Experimental Overview \& Main Results}{3}{subsection.1.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.6}Summary of Contributions}{3}{subsection.1.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {2}Related Work}{3}{section.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}News Sentiment in Financial Prediction}{3}{subsection.2.1}\protected@file@percent }
+\citation{lopez2023}
+\citation{xie2023}
+\citation{li2024llm}
+\citation{wu2023bloomberggpt}
+\citation{wei2022}
+\citation{dragomiretskiy2014}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Exchange Rate Modeling \& Volatility Forecasting}{4}{subsection.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Large Language Models for Financial Forecasting}{4}{subsection.2.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3}Methodology}{4}{section.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Overview}{4}{subsection.3.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Phase A: Signal Decomposition via VMD}{4}{subsection.3.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces End-to-end pipeline of the proposed USD/INR prediction framework. Phase~A decomposes the exchange rate signal via VMD; Phase~B engineers thematic features from GDELT; Phase~C classifies volatility; Phase~D produces predictions via three complementary model families.}}{5}{figure.caption.1}\protected@file@percent }
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{fig:pipeline}{{1}{5}{End-to-end pipeline of the proposed USD/INR prediction framework. Phase~A decomposes the exchange rate signal via VMD; Phase~B engineers thematic features from GDELT; Phase~C classifies volatility; Phase~D produces predictions via three complementary model families}{figure.caption.1}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces VMD signal decomposition separates the USD/INR exchange rate into three intrinsic mode functions. IMF$_3$ (noise component) captures news-driven volatility and serves as the prediction target for Phase~B--C.}}{6}{figure.caption.2}\protected@file@percent }
+\newlabel{fig:vmd}{{2}{6}{VMD signal decomposition separates the USD/INR exchange rate into three intrinsic mode functions. IMF$_3$ (noise component) captures news-driven volatility and serves as the prediction target for Phase~B--C}{figure.caption.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Phase B: Thematic Feature Engineering}{6}{subsection.3.3}\protected@file@percent }
+\citation{chen2016xgboost}
+\citation{nelson1991}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Thematic feature engineering pipeline. Raw GDELT articles are filtered into four market-relevant themes, then aggregated into 16 daily features across four categories. This thematic approach yields 3$\times $ higher correlation with exchange rate volatility compared to raw aggregation.}}{7}{figure.caption.3}\protected@file@percent }
+\newlabel{fig:thematic}{{3}{7}{Thematic feature engineering pipeline. Raw GDELT articles are filtered into four market-relevant themes, then aggregated into 16 daily features across four categories. This thematic approach yields 3$\times $ higher correlation with exchange rate volatility compared to raw aggregation}{figure.caption.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}Phase C: Volatility Classification}{7}{subsection.3.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.5}EGARCH Volatility Modeling}{8}{subsection.3.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.6}Monte Carlo Simulation}{8}{subsection.3.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.7}Debiased Multi-Persona Gemini AI System (V4)}{8}{subsection.3.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.7.1}Statistical Model}{8}{subsubsection.3.7.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.7.2}LLM Ensemble}{8}{subsubsection.3.7.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Gemini V4 Multi-Persona Architecture}}{8}{table.caption.5}\protected@file@percent }
+\newlabel{tab:personas}{{1}{8}{Gemini V4 Multi-Persona Architecture}{table.caption.5}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Gemini V4 multi-persona prediction architecture. A statistical Ridge Regression model and a 9-persona LLM ensemble operate in parallel. Persona predictions are robustly aggregated and combined with the statistical model via adaptive weighting based on entropy confidence, $R^2$, and volatility regime.}}{9}{figure.caption.4}\protected@file@percent }
+\newlabel{fig:gemini}{{4}{9}{Gemini V4 multi-persona prediction architecture. A statistical Ridge Regression model and a 9-persona LLM ensemble operate in parallel. Persona predictions are robustly aggregated and combined with the statistical model via adaptive weighting based on entropy confidence, $R^2$, and volatility regime}{figure.caption.4}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.7.3}Debiasing Techniques}{10}{subsubsection.3.7.3}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Six debiasing techniques applied to LLM prompt construction. Techniques 1--3 (top, green) address prompt-level biases; techniques 4--6 (bottom, yellow) provide feedback-based calibration. Together they reduce anchoring, primacy/recency, and overconfidence biases.}}{10}{figure.caption.6}\protected@file@percent }
+\newlabel{fig:debias}{{5}{10}{Six debiasing techniques applied to LLM prompt construction. Techniques 1--3 (top, green) address prompt-level biases; techniques 4--6 (bottom, yellow) provide feedback-based calibration. Together they reduce anchoring, primacy/recency, and overconfidence biases}{figure.caption.6}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.7.4}Aggregation \& Adaptive Weighting}{10}{subsubsection.3.7.4}\protected@file@percent }
+\citation{condorcet1785}
+\citation{simon1955}
+\citation{clemen1989}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.8}Theoretical Grounding: Why LLM Personas Produce Meaningful Signals}{11}{subsection.3.8}\protected@file@percent }
+\newlabel{sec:theoretical}{{3.8}{11}{Theoretical Grounding: Why LLM Personas Produce Meaningful Signals}{subsection.3.8}{}}
+\@writefile{toc}{\contentsline {paragraph}{1. Compressed Knowledge Extraction, Not Market Understanding.}{11}{section*.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{2. Wisdom of Crowds via Condorcet Jury Theorem.}{11}{section*.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{3. Bounded Rationality and Heuristic Aggregation.}{11}{section*.9}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Falsifiability.}{11}{section*.10}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.9}Design Choices \& Justification}{11}{subsection.3.9}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4}Experimental Setup}{12}{section.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Datasets}{12}{subsection.4.1}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Dataset Summary}}{12}{table.caption.11}\protected@file@percent }
+\newlabel{tab:datasets}{{2}{12}{Dataset Summary}{table.caption.11}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Models}{12}{subsection.4.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Model Summary}}{12}{table.caption.12}\protected@file@percent }
+\newlabel{tab:models}{{3}{12}{Model Summary}{table.caption.12}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Evaluation Metrics}{13}{subsection.4.3}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Evaluation Metrics}}{13}{table.caption.13}\protected@file@percent }
+\newlabel{tab:metrics}{{4}{13}{Evaluation Metrics}{table.caption.13}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4}Baselines}{13}{subsection.4.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.5}Implementation \& Reproducibility}{13}{subsection.4.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {5}Results \& Discussion}{14}{section.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Phase A--B: Signal Decomposition \& Feature Correlations}{14}{subsection.5.1}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces Top Feature Correlations with Exchange Rate Noise Component ($\text  {IMF}_3$)}}{14}{table.caption.14}\protected@file@percent }
+\newlabel{tab:correlations}{{5}{14}{Top Feature Correlations with Exchange Rate Noise Component ($\text {IMF}_3$)}{table.caption.14}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Phase C: Danger-Day Classification}{14}{subsection.5.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {6}{\ignorespaces Danger-Day Classification Results (Test Set, 73 days)}}{14}{table.caption.15}\protected@file@percent }
+\newlabel{tab:classification}{{6}{14}{Danger-Day Classification Results (Test Set, 73 days)}{table.caption.15}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.2.1}Directional Prediction}{14}{subsubsection.5.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}Lead-Lag Analysis}{15}{subsection.5.3}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {7}{\ignorespaces Lead-Lag Correlation Analysis}}{15}{table.caption.16}\protected@file@percent }
+\newlabel{tab:leadlag}{{7}{15}{Lead-Lag Correlation Analysis}{table.caption.16}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.4}GARCH/EGARCH Volatility Results}{15}{subsection.5.4}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {8}{\ignorespaces GARCH Family Model Comparison}}{15}{table.caption.17}\protected@file@percent }
+\newlabel{tab:garch}{{8}{15}{GARCH Family Model Comparison}{table.caption.17}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.5}Regression Model Results}{15}{subsection.5.5}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {9}{\ignorespaces Regression Model Results: Exact Price Prediction}}{15}{table.caption.18}\protected@file@percent }
+\newlabel{tab:regression}{{9}{15}{Regression Model Results: Exact Price Prediction}{table.caption.18}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.6}Gemini V4 Multi-Persona Results}{15}{subsection.5.6}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {10}{\ignorespaces Gemini V4 vs.\ V3 Performance Comparison (2023 Full Year, 262 Trading Days)}}{16}{table.caption.19}\protected@file@percent }
+\newlabel{tab:gemini}{{10}{16}{Gemini V4 vs.\ V3 Performance Comparison (2023 Full Year, 262 Trading Days)}{table.caption.19}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {11}{\ignorespaces Gemini V4 January 2026 Live Predictions (Selected Days)}}{16}{table.caption.20}\protected@file@percent }
+\newlabel{tab:jan2026}{{11}{16}{Gemini V4 January 2026 Live Predictions (Selected Days)}{table.caption.20}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.7}Ultimate Ensemble Comparison}{16}{subsection.5.7}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {12}{\ignorespaces Comprehensive Model Comparison (sorted by RMSE)}}{16}{table.caption.21}\protected@file@percent }
+\newlabel{tab:ensemble}{{12}{16}{Comprehensive Model Comparison (sorted by RMSE)}{table.caption.21}{}}
+\citation{wu2020sentiment}
+\citation{nassirtoussi2014}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.8}Monte Carlo Forecasting Results}{17}{subsection.5.8}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {13}{\ignorespaces 30-Day Monte Carlo Forecast Comparison (from 89.90 INR base)}}{17}{table.caption.22}\protected@file@percent }
+\newlabel{tab:montecarlo}{{13}{17}{30-Day Monte Carlo Forecast Comparison (from 89.90 INR base)}{table.caption.22}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.9}Discussion}{17}{subsection.5.9}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Synthesis.}{17}{section*.23}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Simpler models dominate.}{17}{section*.24}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Comparison to prior work.}{17}{section*.25}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{LLM ablation study.}{17}{section*.26}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Practical relevance.}{17}{section*.27}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {14}{\ignorespaces Recommended Model by Forecasting Horizon}}{18}{table.caption.28}\protected@file@percent }
+\newlabel{tab:recommended}{{14}{18}{Recommended Model by Forecasting Horizon}{table.caption.28}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6}Conclusion}{18}{section.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {7}Limitations}{18}{section.7}\protected@file@percent }
+\bibstyle{apalike}
+\bibcite{baker2007}{{1}{2007}{{Baker \& Wurgler}}{{}}}
+\bibcite{bis2022}{{2}{2022}{{BIS}}{{}}}
+\bibcite{bollerslev1986}{{3}{1986}{{Bollerslev}}{{}}}
+\bibcite{bollen2011}{{4}{2011}{{Bollen et al.}}{{}}}
+\bibcite{chen2016xgboost}{{5}{2016}{{Chen \& Guestrin}}{{}}}
+\bibcite{clemen1989}{{6}{1989}{{Clemen}}{{}}}
+\bibcite{condorcet1785}{{7}{1785}{{Condorcet}}{{}}}
+\bibcite{dragomiretskiy2014}{{8}{2014}{{Dragomiretskiy \& Zosso}}{{}}}
+\bibcite{engel2014}{{9}{2005}{{Engel \& West}}{{}}}
+\bibcite{galeshchuk2016}{{10}{2016}{{Galeshchuk}}{{}}}
+\bibcite{leetaru2013}{{11}{2013}{{Leetaru \& Schrodt}}{{}}}
+\bibcite{li2024llm}{{12}{2024}{{Li et al.}}{{}}}
+\bibcite{lopez2023}{{13}{2023}{{Lopez-Lira \& Tang}}{{}}}
+\bibcite{meese1983}{{14}{1983}{{Meese \& Rogoff}}{{}}}
+\bibcite{nassirtoussi2014}{{15}{2014}{{Nassirtoussi et al.}}{{}}}
+\bibcite{nelson1991}{{16}{1991}{{Nelson}}{{}}}
+\bibcite{rossi2013}{{17}{2013}{{Rossi}}{{}}}
+\bibcite{sawhney2021}{{18}{2021}{{Sawhney et al.}}{{}}}
+\bibcite{sezer2020}{{19}{2020}{{Sezer et al.}}{{}}}
+\bibcite{simon1955}{{20}{1955}{{Simon}}{{}}}
+\bibcite{tetlock2007}{{21}{2007}{{Tetlock}}{{}}}
+\bibcite{wei2022}{{22}{2022}{{Wei et al.}}{{}}}
+\bibcite{wu2020sentiment}{{23}{2020}{{Wu et al.}}{{}}}
+\bibcite{wu2023bloomberggpt}{{24}{2023}{{Wu et al.}}{{}}}
+\bibcite{xie2023}{{25}{2023}{{Xie et al.}}{{}}}
+\@writefile{toc}{\contentsline {section}{\numberline {A}Complete Feature List}{20}{appendix.A}\protected@file@percent }
+\newlabel{app:features}{{A}{20}{Complete Feature List}{appendix.A}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {A.1}Original GDELT Fields (Selected)}{20}{subsection.A.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {A.2}Engineered Features (Phase B)}{21}{subsection.A.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {B}EGARCH + XGBoost Feature Importances}{21}{appendix.B}\protected@file@percent }
+\newlabel{app:egarch}{{B}{21}{EGARCH + XGBoost Feature Importances}{appendix.B}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {15}{\ignorespaces Top 10 Features in Hybrid EGARCH + XGBoost Model}}{21}{table.caption.31}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {C}Project Statistics}{21}{appendix.C}\protected@file@percent }
+\newlabel{app:stats}{{C}{21}{Project Statistics}{appendix.C}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {16}{\ignorespaces Overall Project Statistics}}{21}{table.caption.32}\protected@file@percent }
+\gdef \@abspage@last{21}

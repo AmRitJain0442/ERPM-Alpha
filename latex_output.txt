@@ -1,0 +1,75 @@
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (MiKTeX 24.1) (preloaded format=pdflatex.fmt)
+ restricted \write18 enabled.
+entering extended mode
+(research_paper.tex
+LaTeX2e <2023-11-01> patch level 1
+L3 programming layer <2024-01-04>
+(C:\Users\amrit\AppData\Local\Programs\MiKTeX\tex/latex/base\article.cls
+Document Class: article 2023/05/17 v1.4n Standard LaTeX document class
+(C:\Users\amrit\AppData\Local\Programs\MiKTeX\tex/latex/base\size11.clo))
+(C:\Users\amrit\AppData\Local\Programs\MiKTeX\tex/latex/base\inputenc.sty)
+(C:\Users\amrit\AppData\Local\Programs\MiKTeX\tex/latex/base\fontenc.sty)
+(C:\Users\amrit\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsmath.sty
+For additional information on amsmath, use the `?' option.
+(C:\Users\amrit\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amstext.sty
+(C:\Users\amrit\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsgen.sty))
+(C:\Users\amrit\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsbsy.sty)
+(C:\Users\amrit\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsopn.sty))
+(C:\Users\amrit\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\amssymb.sty
+(C:\Users\amrit\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\amsfonts.sty))
+ (C:\Users\amrit\AppData\Local\Programs\MiKTeX\tex/latex/graphics\graphicx.sty
+(C:\Users\amrit\AppData\Local\Programs\MiKTeX\tex/latex/graphics\keyval.sty)
+(C:\Users\amrit\AppData\Local\Programs\MiKTeX\tex/latex/graphics\graphics.sty
+(C:\Users\amrit\AppData\Local\Programs\MiKTeX\tex/latex/graphics\trig.sty)
+(C:\Users\amrit\AppData\Local\Programs\MiKTeX\tex/latex/graphics-cfg\graphics.c
+fg)
+(C:\Users\amrit\AppData\Local\Programs\MiKTeX\tex/latex/graphics-def\pdftex.def
+)))
+(C:\Users\amrit\AppData\Local\Programs\MiKTeX\tex/latex/booktabs\booktabs.sty)
+(C:\Users\amrit\AppData\Local\Programs\MiKTeX\tex/latex/multirow\multirow.sty)
+(C:\Users\amrit\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\hyperref.sty
+(C:\Users\amrit\AppData\Local\Programs\MiKTeX\tex/generic/iftex\iftex.sty)
+(C:\Users\amrit\AppData\Local\Programs\MiKTeX\tex/generic/infwarerr\infwarerr.s
+ty)
+(C:\Users\amrit\AppData\Local\Programs\MiKTeX\tex/latex/kvsetkeys\kvsetkeys.sty
+)
+(C:\Users\amrit\AppData\Local\Programs\MiKTeX\tex/generic/kvdefinekeys\kvdefine
+keys.sty)
+(C:\Users\amrit\AppData\Local\Programs\MiKTeX\tex/generic/pdfescape\pdfescape.s
+ty
+(C:\Users\amrit\AppData\Local\Programs\MiKTeX\tex/generic/ltxcmds\ltxcmds.sty)
+(C:\Users\amrit\AppData\Local\Programs\MiKTeX\tex/generic/pdftexcmds\pdftexcmds
+.sty))
+(C:\Users\amrit\AppData\Local\Programs\MiKTeX\tex/latex/hycolor\hycolor.sty)
+(C:\Users\amrit\AppData\Local\Programs\MiKTeX\tex/latex/letltxmacro\letltxmacro
+.sty)
+(C:\Users\amrit\AppData\Local\Programs\MiKTeX\tex/latex/auxhook\auxhook.sty)
+(C:\Users\amrit\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\nameref.sty
+(C:\Users\amrit\AppData\Local\Programs\MiKTeX\tex/latex/refcount\refcount.sty)
+(C:\Users\amrit\AppData\Local\Programs\MiKTeX\tex/generic/gettitlestring\gettit
+lestring.sty
+(C:\Users\amrit\AppData\Local\Programs\MiKTeX\tex/latex/kvoptions\kvoptions.sty
+)))
+(C:\Users\amrit\AppData\Local\Programs\MiKTeX\tex/latex/etoolbox\etoolbox.sty)
+(C:\Users\amrit\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\pd1enc.def)
+(C:\Users\amrit\AppData\Local\Programs\MiKTeX\tex/generic/intcalc\intcalc.sty)
+(C:\Users\amrit\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\puenc.def)
+(C:\Users\amrit\AppData\Local\Programs\MiKTeX\tex/latex/url\url.sty)
+! Interruption.
+<argument> \__file_size:n {bitset.sty}
+                                      
+l.5209 \def
+           \HyField@NewFlag#1#2{%
+? Type <return> to proceed, S to scroll future error messages,
+R to run without stopping, Q to run quietly,
+I to insert something, E to edit your file,
+H for help, X to quit.
+? 
+! Emergency stop.
+<argument> \__file_size:n {bitset.sty}
+                                      
+l.5209 \def
+           \HyField@NewFlag#1#2{%
+!  ==> Fatal error occurred, no output PDF file produced!
+Transcript written on research_paper.log.
+pdflatex: major issue: So far, you have not checked for MiKTeX updates.

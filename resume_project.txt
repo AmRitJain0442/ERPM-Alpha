@@ -1,0 +1,11 @@
+USD/INR Exchange Rate Prediction Using LLM Agents & News Sentiment
+
+Tech Stack: Python, Google Gemini API, GDELT, XGBoost, GARCH/EGARCH, BigQuery, Monte Carlo Simulation
+
+• Designed a debiased multi-persona LLM simulation (V4) with 9 specialized Gemini AI agents and adaptive stat/LLM weighting (70-85% statistical, 15-30% LLM); achieved ~0.3% average prediction error and 54-58% directional accuracy, outperforming GARCH, ARIMA, and deep learning baselines (which showed negative R²).
+
+• Engineered a data pipeline processing 7.5M+ GDELT news articles to extract Goldstein Scale and tone-based sentiment features; discovered that political sentiment leads exchange rate movements by 4 days, enabling proactive volatility forecasting for the Indian Rupee.
+
+• Built V4 architecture using debiased symmetric prompts, randomized direction labels, cross-validated Ridge regression, entropy-based confidence weighting, and trimmed weighted mean aggregation; captured INR depreciation trends in live Jan 2026 predictions with <0.5% avg error across 30 trading days.
+
+V4 Results: ~0.3% avg error | 64.8% directional accuracy | R² 0.76-0.82 | outperformed GARCH, ARIMA, LSTM, GRU baselines

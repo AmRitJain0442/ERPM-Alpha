@@ -1,0 +1,153 @@
+﻿PROJECT WORK DOCUMENTATION
+LLM Evaluation Research: USD/INR Exchange Rate Prediction
+1. Project Overview
+1.1 Project Title
+Predicting USD/INR Exchange Rate Volatility Using News Sentiment Analysis and Multi-Persona LLM Agents
+1.2 Objective
+The primary objective of this research is to evaluate the capability of Large Language Models to predict USD/INR exchange rate movements and volatility when augmented with real-time global news data (GDELT). We aim to assess whether a "multi-persona" LLM system—simulating a trading floor with specialized agents—can outperform traditional statistical models (GARCH, ARIMA) and machine learning baselines (XGBoost).
+1.3 Research Questions
+1. Can LLM agents initialized with specific financial personas (e.g., Macro Analyst, Risk Manager) provide more accurate market forecasts than generic prompts?
+2. Does the integration of GDELT news sentiment data with historical price data improve the predictive accuracy of LLMs compared to using price data alone?
+3. How effectively can LLMs identify high-volatility "danger days" based on geopolitical and economic news signals?
+4. Does an ensemble of LLM agents and statistical models outperform either approach individually?
+
+2. Literature Review & Background
+2.1 Related Work
+Financial forecasting has traditionally relied on econometric models like ARIMA and GARCH. More recently, Deep Learning models (LSTMs, Transformers) have been applied to time-series data. However, the application of LLMs for direct numerical forecasting based on textual news analysis is a nascent field. Existing work often focuses on simple sentiment analysis (positive/negative), whereas this project leverages GDELT's rich metadata (Goldstein Scale, AvgTone) and LLM reasoning.
+2.2 Research Gaps & Motivation
+Most current LLM evaluations in finance focus on developed markets (US/EU) using text classification or summarization. There is a distinct lack of research applying advanced LLM agents to emerging markets like India, which are characterized by higher volatility and stronger sensitivity to news sentiment. Our project addresses this gap by evaluating LLMs as *agents* simulating decision-making processes in the specific context of the Indian Rupee (INR), where geopolitical and domestic news often drive rapid market shifts that traditional models miss.
+2.3 Background on Task/Domain
+The USD/INR currency pair is uniquely complex, influenced by a mix of global factors (US Fed policy, oil prices) and highly specific local drivers (RBI intervention, Indian elections, budget announcements). Unlike stable developed market currencies, the INR often exhibits sharp, sentiment-driven volatility spikes. This domain requires processing vast amounts of unstructured text (news) and understanding the nuances of the Indian economy, a task well-suited for multimodal LLM workflows that can parse "Fedspeak" alongside local political developments.
+
+3. LLMs Under Evaluation
+3.1 Model Selection & Rationale
+We selected Google's Gemini models due to their strong reasoning capabilities and large context window, which is essential for processing daily news summaries and historical data context.
+Model Name
+	Version/ID
+	Access Method
+	Parameters/Size
+	Notes
+	Gemini Pro
+	gemini-1.5-flash/pro
+	Google AI Studio API
+	Unknown (Large)
+	Used for the primary multi-persona simulation.
+	 
+4. Evaluation Methodology
+4.1 Evaluation Framework
+We implemented a custom "Multi-Persona Market Simulation" framework. The system simulates a trading floor with 9 specialized AI agents (personas).
+- **Architecture:** The framework ingests daily GDELT news and market data.
+- **Process:** Each persona analyzes the data from its unique perspective (e.g., a "Technical Analyst" looks at price trends, a "Political Analyst" looks at election news) and outputs a forecast and confidence score.
+- **Aggregation:** Responses are aggregated using a weighted ensemble approach to produce a final prediction.
+4.2 Evaluation Metrics
+We use standard regression and classification metrics to evaluate performance:
+- **RMSE (Root Mean Square Error):** To measure the magnitude of prediction errors.
+- **MAE (Mean Absolute Error):** To measure average error magnitude.
+- **Directional Accuracy:** The percentage of days the model correctly predicted the direction of the move (Up/Down).
+- **Volatility Classification Accuracy:** Precision/Recall in identifying high-volatility days.
+4.3 Prompting Strategy
+We utilized a **Persona-Based Chain-of-Thought** strategy.
+- **System Prompts:** defined specific roles (e.g., "You are a veteran Macro Analyst...").
+- **Context:** Prompts included a summary of the previous day's news, current technical indicators (RSI, Bollinger Bands), and recent price history.
+- **Task:** Agents were asked to "think step-by-step" about the impact of news on the exchange rate before providing a numerical forecast.
+4.3.1 Prompt Templates
+(See `gemini_daily_predictor.py` and `enhanced_ensemble.py` for full prompt structures)
+*Example Persona Definition:*
+"You are a cynical Risk Manager. Focus on tail risks, geopolitical escalation, and potential black swan events. Your job is to protect capital."
+4.4 Sampling Parameters
+- **Temperature:** Set low (0.1 - 0.3) to encourage deterministic and analytical outputs suitable for financial forecasting.
+- **Top_p/Top_k:** Standard settings to ensure focused generation.
+
+5. Test Data & Benchmarks
+5.1 Datasets/Benchmarks Used
+Dataset/Benchmark
+	Source
+	Details
+	Task Type
+	GDELT Project
+	gdeltproject.org
+	2.5M+ articles (Jan '25 - Dec '25)
+	News Sentiment & Event Data
+	USD/INR Rates
+	Frankfurter API
+	Daily closing rates (2023-2026)
+	Time Series Target
+	Macro Indicators
+	Yahoo Finance/FRED
+	Oil, Gold, DXY, US10Y Yields
+	Exogenous Variables
+
+5.2 Data Characteristics
+- **Time Period:** 2023-01-01 to 2026-01-30.
+- **News Data:** Filtered for relevance to India/USA/Economy. Features include `AvgTone` (sentiment) and `GoldsteinScale` (stability).
+- **Preprocessing:** News data was aggregated daily; technical indicators (RSI, MACD) were computed for price data.
+5.3 Human Evaluation Setup
+Qualitative evaluation of the rationales provided by the LLM agents was performed to ensure logical consistency with economic theory (e.g., checking if the model correctly identified that rising US yields typically strengthen the USD against INR).
+
+6. Experiments Log
+Exp ID
+	Date
+	Configuration / What Changed
+	Status
+	Results Summary
+	EXP-V3
+	Jan 2026
+	Basic Hybrid Model (Ridge + Gemini). 80/20 fixed weight.
+	Completed
+	Baseline performance established.
+	EXP-V4
+	Jan 2026
+	Debiased Design. Randomized direction labels, entropy weighting, symmetric prompts.
+	Completed
+	Reduced bias, better handling of volatility.
+	EXP-V5
+	Jan 2026
+	Simplified Baseline (Last Close).
+	Completed
+	Used as a benchmark for "no-skill" prediction.
+	 
+7. Results & Analysis
+7.1 Quantitative Results
+*Note: Specific numerical results are available in `simulation_summary.csv` and `model_results_comprehensive.txt`.*
+- **Directional Accuracy:** The multi-persona LLM system achieved competitive directional accuracy compared to random chance (50%).
+- **Volatility Prediction:** The integration of GDELT news significantly improved the model's ability to foresee high-volatility days (9-12 day lead time for political signals).
+7.2 Qualitative Analysis
+- **Strengths:** The LLM excelled at interpreting complex geopolitical events (e.g., elections, trade deals) that pure statistical models missed.
+- **Weaknesses:** The LLM occasionally "hallucinated" strong market reactions to minor news events or struggled with precise numerical targets compared to GARCH.
+7.3 Visualizations
+Key visualizations include:
+- **News Volume vs. Volatility:** Showing the correlation between news intensity and market movement.
+- **Persona Agreement:** Charts showing disjoints between "Technical" and "Fundamental" personas during market shocks.
+
+8. Discussion & Insights
+8.1 Key Findings
+- **News is a Volatility Predictor:** While predicting exact price levels is hard, news sentiment is a strong leading indicator for volatility.
+- **Persona Diversity Matters:** The "Risk Manager" and "Macro Analyst" personas often diverged, providing a more robust ensemble prediction than a single "Forecaster" prompt.
+- **Debiasing is Critical:** Early iterations (V3) suffered from bullish/bearish biases. The V4 "debiased" architecture with randomized labels significantly improved reliability.
+8.2 Practical Implications
+For practitioners, this system suggests that LLMs are best used as "Copilots" for risk assessment—flagging potential danger days based on news—rather than as standalone trading bots.
+8.3 Limitations
+- **Cost/Latency:** Querying an LLM 9 times daily (for each persona) is slower and more expensive than running a regression model.
+- **Context Limit:** While Gemini has a large context, we still had to summarize daily news, potentially losing granular details.
+
+9. Next Steps & Future Work
+9.1 Future Research Directions
+- **Real-time Streaming:** Moving from daily aggregates to real-time intraday news processing.
+- **Fine-tuning:** Fine-tuning a smaller model (e.g., Llama 3) specifically on financial news to reduce costs and dependency on external APIs.
+- **Graph RAG:** Implementing Graph Retrieval-Augmented Generation to better understand the relationships between entities (e.g., Companies, Politicians) mentioned in the news.
+- **Multimodal Analysis:** Experimenting with multimodal LLMs to directly ingest chart images (candlestick patterns) alongside textual news, allowing the model to "see" technical formations like a human trader.
+
+10. References & Resources
+10.1 Key Resources
+- **GDELT Project:** Leetaru, K., & Schrodt, P. A. (2013). The Global Database of Events, Language, and Tone.
+- **Gemini API:** Google DeepMind.
+- **Frankfurter API:** For exchange rate data.
+- **Codebase:** See `gemini_daily_predictor.py` and `mixtureofexperts.py` for implementation details.
+-Meng et al. (2024): Enhancing Exchange Rate Forecasting with Explainable Deep Learning Models.
+-Bataineh (2022): USD Exchange Rate Cycles Using Developed and Developing Currencies and Risk Factors.
+-Nielsen (2018): Machine Learning for Foreign Exchange Rate Forecasting.
+-Pompeu & Rossi (2022): Real/Dollar Exchange Rate Prediction Combining Machine Learning and Fundamental Models.
+-Evans (2020): Short-run and long-run determinants of exchange rate fluctuations: A tale of the Dollar and the Naira.
+-Karoui & Kammoun (2021): Exchange Rate Determination: Mixed Microstructural and Macroeconomic Approach.
+-Yin (2011): Macroeconomic Fundamentals and Exchange Rates Dynamics: A No-Arbitrage Multi-Country Model.
+-1Murad (2022): The role of domestic and foreign economic uncertainties in determining the foreign exchange rates.

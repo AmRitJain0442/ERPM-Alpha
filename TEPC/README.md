@@ -15,6 +15,9 @@ instead model it as one node inside a global macro network shaped by:
 
 The current implementation is local-data-first so it can run immediately on
 this repo, while keeping the architecture open for live API ingestion later.
+It now also supports a stricter lagged setup where observations at date `t`
+predict the first market response at `t+2`, so the model does not see the
+target day's `T-1` price.
 
 ## What The Module Does
 
@@ -50,6 +53,12 @@ The runnable local version uses nodes that are already present in this repo:
 - `THEME_PRESSURE`
 
 This is enough to prototype the TEPC architecture on real repo data right now.
+
+When raw local GDELT files are present, the pipeline also adds:
+
+- `LIVE_INDIA_FX_NEWS`
+- `LIVE_USD_MACRO_NEWS`
+- `LIVE_GEO_RISK`
 
 ## Important Modeling Choice
 
@@ -100,7 +109,7 @@ Each run writes to `TEPC/outputs/<timestamp or explicit output dir>/`:
 From the repository root:
 
 ```powershell
-python "TEPC\pull_data.py"
+python "TEPC\pull_data.py" --start-date 2025-01-01 --end-date 2025-12-31
 python "TEPC\run.py" --help
 python "TEPC\run.py"
 python "TEPC\run.py" --test-days 60 --experiment tepc_full
@@ -123,9 +132,33 @@ TEPC node graph with:
 - `CNHUSD`
 - live GDELT-derived news pressure nodes
 
-If the public GDELT API rate-limits, `pull_data.py` falls back to a local
-daily news-pressure panel built from this repo's thematic, political, and
-Goldstein datasets so the run directory still remains self-contained.
+The current priority order for GDELT is:
+
+1. local raw aggregation from:
+   - `india_news_gz_combined_sorted.csv`
+   - `usa_news_combined_sorted.csv`
+2. public GDELT timeline API
+3. local fallback panel built from the repo's thematic, political, and
+   Goldstein datasets
+
+Important date reality:
+
+- `usa_news_combined_sorted.csv` currently covers `2025-01-01` to `2025-12-30`
+- `india_news_gz_combined_sorted.csv` currently covers `2025-01-01` to `2025-12-28`
+
+So with those exact files, strict raw GDELT backtests are effectively 2025
+experiments unless additional earlier USA raw files are added.
+
+## Strict Timing
+
+The stricter configuration uses:
+
+- `response_lag_days = 2`
+- no direct flat-feature use of INR/USD lag or momentum terms
+- target response beginning two trading days after the observation date
+
+That means a row dated `t` predicts the first labeled response at `t+2`, which
+prevents the model from depending on the target day's immediately prior price.
 
 ## Plotting
 

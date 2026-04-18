@@ -9,6 +9,7 @@ from datetime import date
 from pathlib import Path
 from typing import Dict, Optional
 import json
+import re
 import time
 
 import numpy as np
@@ -47,12 +48,92 @@ GDELT_QUERIES = {
 }
 
 
+RAW_GDELT_USECOLS = [
+    "SQLDATE",
+    "Actor1Name",
+    "Actor2Name",
+    "QuadClass",
+    "GoldsteinScale",
+    "NumMentions",
+    "NumArticles",
+    "AvgTone",
+    "SOURCEURL",
+]
+
+INDIA_FX_KEYWORDS = [
+    "economy",
+    "inflation",
+    "rbi",
+    "reserve bank",
+    "tax",
+    "gdp",
+    "fiscal",
+    "monetary",
+    "interest rate",
+    "repo rate",
+    "trade",
+    "rupee",
+    "currency",
+    "exchange rate",
+    "foreign exchange",
+    "forex",
+    "fed",
+    "federal reserve",
+    "stock market",
+    "bond",
+    "yield",
+    "budget",
+    "oil",
+    "gold",
+]
+
+USD_MACRO_KEYWORDS = [
+    "federal reserve",
+    "fed",
+    "treasury",
+    "dollar",
+    "bond",
+    "yield",
+    "interest rate",
+    "inflation",
+    "tariff",
+    "trade",
+    "oil",
+    "gold",
+    "economic",
+    "economy",
+    "recession",
+    "payroll",
+    "cpi",
+    "pce",
+]
+
+GEO_RISK_KEYWORDS = [
+    "war",
+    "military",
+    "missile",
+    "attack",
+    "conflict",
+    "sanction",
+    "embargo",
+    "tariff",
+    "terror",
+    "threat",
+    "border",
+    "standoff",
+    "riot",
+    "unrest",
+    "oil shock",
+]
+
+
 @dataclass
 class PullConfig:
     start_date: str = "2024-12-01"
     end_date: Optional[str] = None
     output_dir: Optional[Path] = None
     gdelt_pause_seconds: float = 7.0
+    gdelt_chunk_size: int = 100_000
 
     def resolve_output_dir(self) -> Path:
         return self.output_dir or (MODULE_ROOT / "data")
@@ -111,6 +192,56 @@ def _read_indexed_csv(path: Path, date_col: str) -> pd.DataFrame:
     return frame
 
 
+def _compile_keyword_regex(keywords) -> re.Pattern[str]:
+    return re.compile("|".join(re.escape(keyword) for keyword in keywords), re.IGNORECASE)
+
+
+INDIA_FX_REGEX = _compile_keyword_regex(INDIA_FX_KEYWORDS)
+USD_MACRO_REGEX = _compile_keyword_regex(USD_MACRO_KEYWORDS)
+GEO_RISK_REGEX = _compile_keyword_regex(GEO_RISK_KEYWORDS)
+
+
+def _daily_signal_block(
+    dates: pd.Series,
+    mentions: pd.Series,
+    articles: pd.Series,
+    tone: pd.Series,
+    goldstein: pd.Series,
+    mask: pd.Series,
+) -> pd.DataFrame:
+    if not bool(mask.any()):
+        return pd.DataFrame(columns=["weight", "volume", "articles", "tone_num", "gold_num"])
+
+    clipped_mentions = mentions[mask].clip(lower=0.0)
+    weights = clipped_mentions.where(clipped_mentions > 0.0, 1.0)
+    frame = pd.DataFrame(
+        {
+            "Date": dates[mask].to_numpy(),
+            "weight": weights.to_numpy(dtype=float),
+            "volume": clipped_mentions.to_numpy(dtype=float),
+            "articles": articles[mask].clip(lower=0.0).to_numpy(dtype=float),
+            "tone_num": (tone[mask] * weights).to_numpy(dtype=float),
+            "gold_num": (goldstein[mask] * weights).to_numpy(dtype=float),
+        }
+    )
+    return frame.groupby("Date", as_index=True)[["weight", "volume", "articles", "tone_num", "gold_num"]].sum()
+
+
+def _finalize_signal(blocks: list[pd.DataFrame], prefix: str) -> pd.DataFrame:
+    columns = [f"{prefix}_volume", f"{prefix}_tone", f"{prefix}_goldstein", f"{prefix}_articles"]
+    if not blocks:
+        return pd.DataFrame(columns=columns)
+
+    grouped = pd.concat(blocks).groupby(level=0).sum().sort_index()
+    denom = grouped["weight"].replace(0.0, np.nan)
+    out = pd.DataFrame(index=grouped.index)
+    out[f"{prefix}_volume"] = grouped["volume"]
+    out[f"{prefix}_tone"] = grouped["tone_num"] / denom
+    out[f"{prefix}_goldstein"] = grouped["gold_num"] / denom
+    out[f"{prefix}_articles"] = grouped["articles"]
+    return out
+
+
 def _build_local_gdelt_fallback(start: str, end: str) -> pd.DataFrame:
     paths = DataPaths()
     frames = []
@@ -163,6 +294,95 @@ def _build_local_gdelt_fallback(start: str, end: str) -> pd.DataFrame:
 
     merged = merged.sort_index()
     merged = merged.loc[(merged.index >= pd.Timestamp(start)) & (merged.index <= pd.Timestamp(end))]
+    merged.index.name = "Date"
+    return merged
+
+
+def _aggregate_raw_gdelt_file(
+    path: Path,
+    signal_key: str,
+    regex: re.Pattern[str],
+    start: pd.Timestamp,
+    end: pd.Timestamp,
+    chunk_size: int,
+) -> tuple[list[pd.DataFrame], list[pd.DataFrame]]:
+    signal_blocks: list[pd.DataFrame] = []
+    risk_blocks: list[pd.DataFrame] = []
+
+    for chunk in pd.read_csv(
+        path,
+        usecols=RAW_GDELT_USECOLS,
+        chunksize=chunk_size,
+        low_memory=False,
+    ):
+        dates = pd.to_datetime(chunk["SQLDATE"].astype(str), format="%Y%m%d", errors="coerce").dt.normalize()
+        date_mask = dates.between(start, end)
+        if not bool(date_mask.any()):
+            continue
+
+        chunk = chunk.loc[date_mask].copy()
+        dates = dates.loc[date_mask]
+        mentions = pd.to_numeric(chunk["NumMentions"], errors="coerce").fillna(0.0)
+        articles = pd.to_numeric(chunk["NumArticles"], errors="coerce").fillna(0.0)
+        tone = pd.to_numeric(chunk["AvgTone"], errors="coerce").fillna(0.0)
+        goldstein = pd.to_numeric(chunk["GoldsteinScale"], errors="coerce").fillna(0.0)
+        quad_class = pd.to_numeric(chunk["QuadClass"], errors="coerce").fillna(0.0)
+
+        text = (
+            chunk["SOURCEURL"].fillna("").astype(str)
+            + " "
+            + chunk["Actor1Name"].fillna("").astype(str)
+            + " "
+            + chunk["Actor2Name"].fillna("").astype(str)
+        ).str.lower()
+
+        signal_mask = text.str.contains(regex, na=False)
+        risk_mask = text.str.contains(GEO_RISK_REGEX, na=False) | ((goldstein < -2.0) & (quad_class >= 3.0))
+
+        signal_block = _daily_signal_block(dates, mentions, articles, tone, goldstein, signal_mask)
+        risk_block = _daily_signal_block(dates, mentions, articles, tone, goldstein, risk_mask)
+        if not signal_block.empty:
+            signal_blocks.append(signal_block)
+        if not risk_block.empty:
+            risk_blocks.append(risk_block)
+
+    return signal_blocks, risk_blocks
+
+
+def fetch_local_raw_gdelt_daily(config: PullConfig) -> pd.DataFrame:
+    paths = DataPaths()
+    start = pd.Timestamp(config.start_date)
+    end = pd.Timestamp(config.resolve_end_date())
+
+    if not (paths.india_raw_gdelt_dataset.exists() and paths.usa_raw_gdelt_dataset.exists()):
+        return pd.DataFrame()
+
+    india_blocks, india_risk_blocks = _aggregate_raw_gdelt_file(
+        paths.india_raw_gdelt_dataset,
+        "india_fx",
+        INDIA_FX_REGEX,
+        start,
+        end,
+        config.gdelt_chunk_size,
+    )
+    usa_blocks, usa_risk_blocks = _aggregate_raw_gdelt_file(
+        paths.usa_raw_gdelt_dataset,
+        "usd_macro",
+        USD_MACRO_REGEX,
+        start,
+        end,
+        config.gdelt_chunk_size,
+    )
+
+    india_daily = _finalize_signal(india_blocks, "india_fx")
+    usa_daily = _finalize_signal(usa_blocks, "usd_macro")
+    risk_daily = _finalize_signal(india_risk_blocks + usa_risk_blocks, "geo_risk")
+
+    merged = india_daily.join(usa_daily, how="outer")
+    merged = merged.join(risk_daily, how="outer")
+    merged = merged.sort_index()
+    if not merged.empty:
+        merged = merged.loc[(merged.index >= start.normalize()) & (merged.index <= end.normalize())]
     merged.index.name = "Date"
     return merged
 
@@ -282,16 +502,28 @@ def pull_and_store_data(config: PullConfig) -> Dict:
     output_dir = config.resolve_output_dir()
     output_dir.mkdir(parents=True, exist_ok=True)
     warnings = []
+    gdelt_source = "local_raw"
 
     market = fetch_market_data(config)
     try:
-        gdelt = fetch_gdelt_daily(config)
-    except Exception as exc:
-        gdelt = _build_local_gdelt_fallback(config.start_date, config.resolve_end_date())
+        gdelt = fetch_local_raw_gdelt_daily(config)
         if gdelt.empty:
-            warnings.append(f"GDELT pull failed and fallback was empty: {exc}")
-        else:
-            warnings.append(f"GDELT pull failed; local fallback feed was used instead: {exc}")
+            raise RuntimeError("Local raw GDELT aggregation returned no rows.")
+    except Exception as raw_exc:
+        gdelt_source = "api"
+        try:
+            gdelt = fetch_gdelt_daily(config)
+        except Exception as api_exc:
+            gdelt_source = "local_fallback"
+            gdelt = _build_local_gdelt_fallback(config.start_date, config.resolve_end_date())
+            if gdelt.empty:
+                warnings.append(
+                    f"Local raw GDELT failed ({raw_exc}); API failed ({api_exc}); fallback was empty."
+                )
+            else:
+                warnings.append(
+                    f"Local raw GDELT failed ({raw_exc}); API failed ({api_exc}); local fallback feed was used."
+                )
     combined = market.join(gdelt, how="outer").sort_index()
 
     market_path = output_dir / "market_nodes_daily.csv"
@@ -311,6 +543,7 @@ def pull_and_store_data(config: PullConfig) -> Dict:
         "combined_rows": int(len(combined)),
         "market_columns": list(market.columns),
         "gdelt_columns": list(gdelt.columns),
+        "gdelt_source": gdelt_source,
         "warnings": warnings,
     }
     metadata_path.write_text(json.dumps(metadata, indent=2, default=str), encoding="utf-8")
@@ -323,5 +556,6 @@ def pull_and_store_data(config: PullConfig) -> Dict:
         "market_path": str(market_path),
         "gdelt_path": str(gdelt_path),
         "combined_path": str(combined_path),
+        "gdelt_source": gdelt_source,
         "warnings": warnings,
     }

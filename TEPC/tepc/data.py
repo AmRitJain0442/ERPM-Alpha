@@ -164,10 +164,16 @@ def load_market_dataset(config: RunConfig) -> MarketDataset:
         "FRED_DEXINUS",
         "india_fx_volume",
         "india_fx_tone",
+        "india_fx_goldstein",
+        "india_fx_articles",
         "usd_macro_volume",
         "usd_macro_tone",
+        "usd_macro_goldstein",
+        "usd_macro_articles",
         "geo_risk_volume",
         "geo_risk_tone",
+        "geo_risk_goldstein",
+        "geo_risk_articles",
     ]
     for col in short_fill_cols:
         if col in merged.columns:
@@ -220,16 +226,19 @@ def load_market_dataset(config: RunConfig) -> MarketDataset:
         node_frame["LIVE_INDIA_FX_NEWS"] = (
             np.log1p(_getcol(merged, "india_fx_volume").clip(lower=0))
             - 0.12 * _getcol(merged, "india_fx_tone")
+            - 0.05 * _getcol(merged, "india_fx_goldstein").clip(upper=0).abs()
         )
     if "usd_macro_volume" in merged.columns:
         node_frame["LIVE_USD_MACRO_NEWS"] = (
             np.log1p(_getcol(merged, "usd_macro_volume").clip(lower=0))
             - 0.12 * _getcol(merged, "usd_macro_tone")
+            - 0.05 * _getcol(merged, "usd_macro_goldstein").clip(upper=0).abs()
         )
     if "geo_risk_volume" in merged.columns:
         node_frame["LIVE_GEO_RISK"] = (
             np.log1p(_getcol(merged, "geo_risk_volume").clip(lower=0))
             - 0.15 * _getcol(merged, "geo_risk_tone")
+            + 0.06 * _getcol(merged, "geo_risk_goldstein").clip(upper=0).abs()
         )
 
     core_nodes = [
@@ -264,6 +273,7 @@ def load_market_dataset(config: RunConfig) -> MarketDataset:
         + config.test_days
         + max(config.corr_window, config.chaos_lookback_days, config.volatility_window)
         + config.forecast_horizon_days
+        + config.response_lag_days
     )
     selected_optional = list(optional_meta)
     chosen = pd.DataFrame()

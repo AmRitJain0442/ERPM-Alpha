@@ -24,6 +24,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--train-min-days", type=int, default=180, help="Minimum historical rows required for training.")
     parser.add_argument("--validation-days", type=int, default=45, help="Validation rows inside the training window.")
     parser.add_argument("--forecast-horizon-days", type=int, default=1, help="Forecast horizon for future INR/USD return.")
+    parser.add_argument(
+        "--response-lag-days",
+        type=int,
+        default=2,
+        help="Trading-day lag between observed signals and the first target response date.",
+    )
     parser.add_argument("--volatility-window", type=int, default=5, help="Forward realized volatility window.")
     parser.add_argument("--breakout-threshold", type=float, default=0.005, help="Breakout label threshold on future return.")
     parser.add_argument("--corr-window", type=int, default=30, help="Rolling window for dynamic topology.")
@@ -42,6 +48,7 @@ def main() -> int:
         train_min_days=args.train_min_days,
         validation_days=args.validation_days,
         forecast_horizon_days=args.forecast_horizon_days,
+        response_lag_days=args.response_lag_days,
         volatility_window=args.volatility_window,
         breakout_threshold=args.breakout_threshold,
         corr_window=args.corr_window,

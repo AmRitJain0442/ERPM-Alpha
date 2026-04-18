@@ -20,6 +20,8 @@ class DataPaths:
     goldstein_dataset: Path = REPO_ROOT / "combined_goldstein_exchange_rates.csv"
     political_dataset: Path = REPO_ROOT / "political_news_exchange_merged.csv"
     fred_dataset: Path = REPO_ROOT / "data" / "gold_standard" / "fred" / "fred_wide_format_20251230_021943.csv"
+    india_raw_gdelt_dataset: Path = REPO_ROOT / "india_news_gz_combined_sorted.csv"
+    usa_raw_gdelt_dataset: Path = REPO_ROOT / "usa_news_combined_sorted.csv"
     tepc_market_dataset: Path = MODULE_ROOT / "data" / "market_nodes_daily.csv"
     tepc_gdelt_dataset: Path = MODULE_ROOT / "data" / "gdelt_daily.csv"
 
@@ -31,6 +33,7 @@ class RunConfig:
     train_min_days: int = 180
     validation_days: int = 45
     forecast_horizon_days: int = 1
+    response_lag_days: int = 2
     volatility_window: int = 5
     breakout_threshold: float = 0.005
     corr_window: int = 30

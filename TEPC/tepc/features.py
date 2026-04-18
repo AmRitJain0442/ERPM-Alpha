@@ -36,11 +36,11 @@ def _range_position(series: pd.Series, window: int) -> pd.Series:
     return (series - rolling_min) / (rolling_max - rolling_min + 1e-9)
 
 
-def _future_realized_volatility(shocks: pd.Series, window: int) -> pd.Series:
+def _future_realized_volatility(shocks: pd.Series, window: int, offset: int) -> pd.Series:
     values = []
     idx = shocks.index
     for pos in range(len(shocks)):
-        future_window = shocks.iloc[pos + 1 : pos + 1 + window].dropna()
+        future_window = shocks.iloc[pos + offset : pos + offset + window].dropna()
         values.append(float(future_window.abs().mean()) if len(future_window) == window else np.nan)
     return pd.Series(values, index=idx, dtype=float)
 
@@ -51,18 +51,16 @@ def build_feature_bundle(dataset: MarketDataset, config: RunConfig) -> FeatureBu
     node_transforms = dataset.node_transforms
 
     market_nodes = [col for col in ["INRUSD", "DXY", "BRENT", "GOLD", "US10Y"] if col in node_frame.columns]
+    macro_feature_nodes = [col for col in market_nodes if col != "INRUSD"]
     alt_nodes = [col for col in node_frame.columns if col not in market_nodes and col != "INRUSD"]
 
     macro = pd.DataFrame(index=node_frame.index)
-    for node in market_nodes:
+    for node in macro_feature_nodes:
         macro[f"{node.lower()}_shock_1"] = node_transforms[node]
         macro[f"{node.lower()}_shock_mean_5"] = node_transforms[node].rolling(5).mean()
         macro[f"{node.lower()}_shock_vol_10"] = node_transforms[node].rolling(10).std()
 
-    macro["inrusd_level_z_20"] = _rolling_zscore(node_frame["INRUSD"], 20)
-    macro["inrusd_range_pos_20"] = _range_position(node_frame["INRUSD"], 20)
-    macro["inrusd_momentum_5"] = node_frame["INRUSD"].pct_change(5)
-    if {"BRENT", "DXY"}.issubset(market_nodes):
+    if {"BRENT", "DXY"}.issubset(macro_feature_nodes):
         macro["brent_dxy_interaction"] = node_transforms["BRENT"] * node_transforms["DXY"]
     else:
         macro["brent_dxy_interaction"] = 0.0
@@ -82,6 +80,12 @@ def build_feature_bundle(dataset: MarketDataset, config: RunConfig) -> FeatureBu
         "pol_event_count",
         "pol_total_mentions",
         "pol_goldstein_std",
+        "india_fx_goldstein",
+        "india_fx_articles",
+        "usd_macro_goldstein",
+        "usd_macro_articles",
+        "geo_risk_goldstein",
+        "geo_risk_articles",
     ]:
         if source_col in merged.columns:
             alt[source_col] = merged[source_col].astype(float)
@@ -100,18 +104,21 @@ def build_feature_bundle(dataset: MarketDataset, config: RunConfig) -> FeatureBu
     )
 
     target = pd.DataFrame(index=node_frame.index)
+    target_offset = config.response_lag_days + config.forecast_horizon_days - 1
     target["decision_date"] = node_frame.index
-    target["target_date"] = node_frame.index.to_series().shift(-config.forecast_horizon_days)
+    target["target_date"] = node_frame.index.to_series().shift(-target_offset)
     target["current_rate"] = node_frame["INRUSD"]
-    target["future_return"] = node_frame["INRUSD"].shift(-config.forecast_horizon_days) / node_frame["INRUSD"] - 1.0
+    target["future_return"] = node_frame["INRUSD"].shift(-target_offset) / node_frame["INRUSD"] - 1.0
     target["future_volatility"] = _future_realized_volatility(
-        node_transforms["INRUSD"].fillna(0.0), config.volatility_window
+        node_transforms["INRUSD"].fillna(0.0),
+        config.volatility_window,
+        offset=config.response_lag_days,
     )
     target["future_label_int"] = target["future_return"].map(
         lambda value: 1 if value > config.breakout_threshold else (-1 if value < -config.breakout_threshold else 0)
     )
     target["future_label"] = target["future_label_int"].map({-1: "down", 0: "range", 1: "up"})
-    target["actual_rate"] = node_frame["INRUSD"].shift(-config.forecast_horizon_days)
+    target["actual_rate"] = node_frame["INRUSD"].shift(-target_offset)
 
     groups = {
         "macro": list(macro.columns),
@@ -132,7 +139,10 @@ def build_feature_bundle(dataset: MarketDataset, config: RunConfig) -> FeatureBu
         "node_count": int(len(node_frame.columns)),
         "feature_group_counts": {group: len(cols) for group, cols in groups.items()},
         "market_nodes": market_nodes,
+        "macro_feature_nodes": macro_feature_nodes,
         "alternative_nodes": alt_nodes,
+        "response_lag_days": int(config.response_lag_days),
+        "forecast_horizon_days": int(config.forecast_horizon_days),
     }
 
     return FeatureBundle(

@@ -102,6 +102,87 @@ Current warning:
 - public GDELT API rate-limited the live timeline pull, so the local fallback
   GDELT panel was used
 
+## Raw GDELT Reality Check
+
+The exact raw files requested for TEPC strict runs were verified on 2026-04-19:
+
+- `usa_news_combined_sorted.csv` covers `2025-01-01` to `2025-12-30`
+- `india_news_gz_combined_sorted.csv` covers `2025-01-01` to `2025-12-28`
+
+So those two files do not currently contain 2023 rows. A pre-2025 strict
+cross-country raw TEPC run would require an older USA raw file.
+
+## Strict Lag Configuration
+
+The stricter TEPC setup now uses:
+
+- `response_lag_days = 2`
+- `forecast_horizon_days = 1`
+- direct flat INR/USD lag, z-score, range-position, and momentum features
+  removed from the macro feature stack
+
+Interpretation:
+
+- a row observed on date `t` predicts the first labeled market response at
+  `t+2`
+- this avoids exposing the model to the target day's `T-1` price
+- topology and chaos still include INR/USD as the target node in the network,
+  but not as direct tabular lag features in the macro baseline
+
+## Latest Strict Raw Run
+
+Run directory:
+
+- `TEPC/outputs/strict_raw_2025_80d/`
+
+Inputs:
+
+- market pull from `2025-01-01` to `2025-12-31`
+- raw GDELT aggregation from the local India and USA files
+- `gdelt_source = local_raw`
+
+Dataset summary:
+
+- feature rows: `214`
+- feature range: `2025-02-13` to `2025-12-24`
+- node count: `15`
+- live raw-news nodes retained:
+  - `LIVE_INDIA_FX_NEWS`
+  - `LIVE_USD_MACRO_NEWS`
+  - `LIVE_GEO_RISK`
+
+Metric ranking:
+
+1. `tepc_full`
+   - breakout accuracy: `0.775`
+   - macro F1: `0.33701`
+   - MAE return: `0.0027458`
+2. `topology_chaos`
+   - breakout accuracy: `0.6875`
+   - macro F1: `0.30303`
+   - MAE return: `0.0029907`
+3. `macro_baseline`
+   - breakout accuracy: `0.7625`
+   - macro F1: `0.28842`
+   - MAE return: `0.00278195`
+4. `chaos_only`
+   - breakout accuracy: `0.7375`
+   - macro F1: `0.28297`
+   - MAE return: `0.00307979`
+5. `topology_only`
+   - breakout accuracy: `0.6875`
+   - macro F1: `0.27569`
+   - MAE return: `0.00335159`
+
+Interpretation to remember:
+
+- after enforcing the 2-day lag and using raw local GDELT, the full TEPC blend
+  becomes the best experiment
+- the stricter setup lowers the easy direction score ceiling versus the looser
+  run, but it still produces a usable 80-day backtest
+- the raw daily GDELT panel is dense enough to keep all three live news nodes
+  in the final graph
+
 ## Latest 100-Day Backtest
 
 Run directory:

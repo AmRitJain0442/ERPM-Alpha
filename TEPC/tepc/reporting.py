@@ -66,6 +66,12 @@ def write_outputs(
         if result.get("metrics"):
             metrics_rows.append({"experiment": result["experiment"], **result["metrics"]})
 
+        if result.get("persona_summary") is not None:
+            (exp_dir / "persona_memory.json").write_text(
+                json.dumps(result["persona_summary"], indent=2, default=str),
+                encoding="utf-8",
+            )
+
     if all_records:
         pd.DataFrame(all_records).to_csv(output_dir / "daily_predictions.csv", index=False)
 

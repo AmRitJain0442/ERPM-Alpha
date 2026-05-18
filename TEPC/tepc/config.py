@@ -64,6 +64,7 @@ class ExperimentSpec:
     name: str
     include_groups: List[str]
     description: str = ""
+    prediction_mode: str = "ml"
 
 
 DEFAULT_EXPERIMENTS = [
@@ -91,6 +92,18 @@ DEFAULT_EXPERIMENTS = [
         name="tepc_full",
         include_groups=["macro", "alt", "topology", "chaos"],
         description="Full TEPC stack with macro, geopolitical, topology, and chaos features.",
+    ),
+    ExperimentSpec(
+        name="persona_rule_only",
+        include_groups=[],
+        description="Rule-based multi-persona market committee without ML fitting.",
+        prediction_mode="persona",
+    ),
+    ExperimentSpec(
+        name="tepc_persona_blend",
+        include_groups=["macro", "alt", "topology", "chaos"],
+        description="Full TEPC stack blended with delayed-calibration persona consensus.",
+        prediction_mode="blend",
     ),
 ]
 

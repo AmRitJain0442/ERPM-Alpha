@@ -24,17 +24,18 @@
 \usepackage{tikz}
 \usetikzlibrary{shapes.geometric, arrows.meta, positioning, calc, fit, backgrounds, decorations.pathreplacing}
 
+\graphicspath{{paper_assets/}}
+
 % TikZ styles
 \tikzset{
-    block/.style={rectangle, draw, fill=blue!12, text width=10em, text centered, rounded corners, minimum height=2.8em, font=\small},
-    wideblock/.style={rectangle, draw, fill=blue!12, text width=14em, text centered, rounded corners, minimum height=2.8em, font=\small},
-    phase/.style={rectangle, draw, fill=orange!20, text width=16em, text centered, rounded corners, minimum height=2.8em, font=\small\bfseries},
-    data/.style={rectangle, draw, fill=green!15, text width=12em, text centered, rounded corners, minimum height=2.8em, font=\small},
-    output/.style={rectangle, draw, fill=red!12, text width=10em, text centered, rounded corners, minimum height=2.8em, font=\small},
-    persona/.style={rectangle, draw, fill=violet!15, text width=8em, text centered, rounded corners, minimum height=3.5em, font=\scriptsize},
-    arrow/.style={-{Stealth[length=2.5mm]}, thick},
-    darrow/.style={-{Stealth[length=2.5mm]}, thick, dashed},
+    block/.style={rectangle, draw, fill=blue!12, text width=11em, text centered, rounded corners, minimum height=3em, font=\small},
+    wideblock/.style={rectangle, draw, fill=blue!12, text width=14em, text centered, rounded corners, minimum height=3em, font=\small},
+    phase/.style={rectangle, draw, fill=orange!22, text width=15em, text centered, rounded corners, minimum height=3em, font=\small\bfseries},
+    data/.style={rectangle, draw, fill=green!15, text width=13em, text centered, rounded corners, minimum height=3em, font=\small},
+    output/.style={rectangle, draw, fill=red!12, text width=12em, text centered, rounded corners, minimum height=3em, font=\small},
+    persona/.style={rectangle, draw, fill=violet!15, text width=7em, text centered, rounded corners, minimum height=3.2em, font=\scriptsize},
     label/.style={font=\scriptsize\itshape, text=gray!70!black},
+    arrow/.style={-{Stealth[length=2.5mm]}, thick},
 }
 
 \hypersetup{
@@ -45,7 +46,8 @@
 }
 
 % ============================================================
-\title{FXSage: Foreign Exchange Sentiment-Augmented Generalized Engine}
+\title{A New Generation of USD/INR Prediction Systems:\\
+GDELT Sentiment, Variational Decomposition, Multi-Persona LLMs, Market Memory, and Topology-Enabled Predictions from Chaos}
 
 \author{
     Dhruv Kumar\thanks{\texttt{dhruv.kumar@pilani.bits-pilani.ac.in}} \and
@@ -54,7 +56,7 @@
     Shrey Bansal\thanks{\texttt{f20230649@pilani.bits-pilani.ac.in}}
 }
 
-\date{March 2026}
+\date{April 2026}
 
 % ============================================================
 \begin{document}
@@ -65,842 +67,951 @@
 % ABSTRACT
 % ============================================================
 \begin{abstract}
-Predicting foreign exchange rate movements remains one of the most challenging problems in computational finance, with traditional econometric models often failing to outperform simple random walk baselines. This paper addresses the unexplored intersection of large-scale news sentiment analysis and LLM-based multi-agent simulation for USD/INR exchange rate volatility prediction. We propose a multi-phase framework that integrates Variational Mode Decomposition (VMD) for signal separation, thematic sentiment feature engineering from 2.5 million GDELT news articles, XGBoost-based volatility classification, GARCH/EGARCH volatility modeling, Monte Carlo simulation, and a novel debiased multi-persona Gemini AI prediction system with 9 specialized forex analyst agents. Our experiments reveal that political news sentiment \textit{leads} exchange rate movements by 9--12 days, and our danger-day classifier achieves 40\% precision (double the random baseline), while the Gemini V4 hybrid model attains $\sim$0.3\% average prediction error and 54--58\% directional accuracy across 262 trading days, outperforming GARCH, ARIMA, LSTM, and GRU baselines that all exhibited negative $R^2$ on test data.
+USD/INR forecasting is difficult because the Indian foreign exchange market is a managed-float system shaped by RBI intervention, imported energy shocks, dollar cycles, geopolitical events, and delayed rather than immediate news absorption. This paper consolidates the full research program embodied in the repository: Phase-A/Phase-B/Phase-C VMD and GDELT pipelines, EGARCH and hybrid volatility models, multi-model ensemble forecasting, regime-switching Monte Carlo simulation, the debiased Gemini V4 multi-persona architecture, the newer market-memory-first \texttt{final phase} stack, and the \texttt{TEPC} topology-chaos branch. Across the saved repo artifacts, raw aggregate signals are weak in isolation (Goldstein vs.\ IMF$_3$ correlation $= 0.010$; US average tone vs.\ USD/INR correlation $= 0.164$), but structured feature engineering recovers delayed signal: \texttt{Tone\_Economy} reaches a statistically significant correlation of $-0.147$ with IMF$_3$, meaningful-pattern analysis finds peak lags of 9 days for Goldstein and 12 days for tone, and the Phase-C danger-day classifier achieves 40\% precision with 52\% recall. In the historical Gemini track, V4 improves over V3 from 0.274\% to 0.270\% mean hybrid absolute error and from 61.3\% to 64.2\% directional accuracy under a sign-of-change evaluation, while January 2026 live predictions average 0.322\% absolute error. In the \texttt{final phase} walk-forward backtest, the memory-only ablation is strongest over 100 test days (MAE price 0.242, directional accuracy 61\%), indicating that compact shared state can outperform heavier feature blends. In the strict raw-GDELT TEPC run, \texttt{tepc\_full} leads on macro-F1 (0.337) with 77.5\% breakout accuracy, while persona blending reduces return MAE to 0.002695 and live 100-day runs show chaos features as the strongest classifier. The repository-wide conclusion is that USD/INR rewards regime detection, volatility classification, shared-state compression, and topology-aware modeling far more than naive direct price regression or heavyweight deep sequence models.
 \end{abstract}
 
-\textbf{Keywords:} Exchange Rate Prediction, News Sentiment Analysis, GDELT, Large Language Models, Volatility Forecasting, Multi-Agent Systems, GARCH, Ensemble Methods, USD/INR
+\textbf{Keywords:} USD/INR, GDELT, VMD, EGARCH, Monte Carlo, LLM Forecasting, Market Memory, TEPC, Chaos Modeling, Exchange Rate Prediction
 
 % ============================================================
 % 1. INTRODUCTION
 % ============================================================
 \section{Introduction}
 
-\subsection{Background \& Motivation}
+Forecasting exchange rates remains one of the hardest problems in empirical finance. The central puzzle established by \citet{meese1983} still holds in modern settings: out-of-sample currency forecasting is notoriously brittle, and many structurally motivated models fail to beat simple benchmarks. This challenge is especially acute for USD/INR, where a managed-float regime, cross-asset dependence on oil and the dollar, event-driven sentiment shocks, and intermittent RBI intervention complicate the mapping from public information to next-day price movement. In such a market, a model can fit history extremely well while remaining economically useless in forward tests.
 
-Foreign exchange (forex) markets are the largest and most liquid financial markets in the world, with daily trading volumes exceeding \$7.5 trillion \citep{bis2022}. Accurate prediction of exchange rate movements is critical for international trade, risk management, and monetary policy \citep{rossi2013}. Since the seminal work of \citet{meese1983}, which demonstrated that structural econometric models fail to outperform a na\"ive random walk for exchange rate forecasting, the field has sought alternative approaches leveraging non-traditional data sources \citep{engel2014}. The emergence of real-time global news databases and large language models (LLMs) presents new opportunities to incorporate textual sentiment and geopolitical signals into exchange rate prediction frameworks \citep{tetlock2007, bollen2011, sawhney2021}.
+At the same time, the informational environment has changed. Global news databases such as GDELT provide dense coverage of political, economic, and geopolitical events in near real time \citep{leetaru2013}. Financial modeling has also broadened from classical volatility models \citep{bollerslev1986, nelson1991} toward boosted trees, neural sequence models, and more recently large language models (LLMs) and multi-agent reasoning systems \citep{chen2016xgboost, sezer2020, lopez2023, xie2023, li2024llm}. The repository studied in this paper is best understood as a research laboratory built around that shift: it starts from raw GDELT sentiment and macro data, progresses through VMD-based decomposition and danger-day classification, then evolves into LLM-assisted forecasting, memory-first hybrid modeling, and finally topology- and chaos-driven network forecasting.
 
-\subsection{Problem Statement}
+This paper does not present a single homogeneous benchmark in which every model is evaluated under one frozen protocol. Instead, it documents and synthesizes the full research program captured by the repository. That distinction matters. The project contains multiple branches developed over time for different forecasting objectives: volatility classification, next-day point prediction, probabilistic scenario forecasting, walk-forward ablations under information embargo, and topology-aware breakout modeling. The scientific value lies in comparing these branches as complementary answers to the same core question: \textit{what kinds of signals and model structures actually survive contact with USD/INR?}
 
-We address a precise, testable question: \textit{Can theme-filtered GDELT news sentiment, combined with a debiased multi-persona LLM ensemble and classical econometric models, predict next-day USD/INR directional movement and high-volatility events more accurately than LSTM, Temporal Fusion Transformer (TFT), XGBoost with technical indicators, and aggregated-sentiment baselines?}
+The central conclusion that emerges is pragmatic. USD/INR is not a market in which arbitrarily complex models automatically help. Raw aggregate sentiment is too weak; direct price regression is unstable; deep sequence models can fail spectacularly; and naive feature augmentation can worsen performance. Signal appears only after decomposition, thematic filtering, lag engineering, state compression, or network-level modeling. In other words, the market problem is not simply ``predict tomorrow's price'', but rather \textit{identify which layer of the market is predictable}: volatility, directional stress, shared market state, or synchronized macro-network regimes.
 
-Formally, given daily inputs $\mathbf{x}_t = [\mathbf{s}_t, \mathbf{m}_t, \mathbf{p}_t]$ comprising thematic sentiment features $\mathbf{s}_t \in \mathbb{R}^{80}$ (16 base features $\times$ 5 lags), macroeconomic indicators $\mathbf{m}_t \in \mathbb{R}^{4}$ (US10Y, oil, gold, DXY), and price history $\mathbf{p}_t$, we evaluate three prediction tasks:
-\begin{enumerate}[leftmargin=*]
-    \item \textbf{Binary volatility classification:} $f(\mathbf{x}_t) \rightarrow \{\text{danger}, \text{safe}\}$, where danger days are the top 20\% by $|\text{IMF}_3|$ magnitude.
-    \item \textbf{Directional prediction:} $g(\mathbf{x}_t) \rightarrow \{\text{UP}, \text{DOWN}, \text{STABLE}\}$.
-    \item \textbf{Point prediction:} $h(\mathbf{x}_t) \rightarrow \hat{y}_{t+1} \in \mathbb{R}$ (next-day closing rate).
-\end{enumerate}
-
-The core challenge lies in the near-random-walk nature of exchange rates \citep{meese1983}, where even sophisticated models struggle to beat simple baselines on test data, and in the noisy, high-dimensional nature of news sentiment signals. Our central hypothesis is that classification-based approaches (Tasks~1--2) are tractable and outperform regression (Task~3), and that thematic sentiment filtering combined with LLM-based reasoning yields statistically significant improvements over both traditional and deep learning baselines.
-
-\subsection{Existing Work \& Research Gaps}
-
-Prior work on sentiment-based exchange rate prediction has explored several approaches. \citet{tetlock2007} demonstrated that media pessimism predicts downward pressure on stock prices. \citet{bollen2011} showed that Twitter mood states can predict stock market movements with 87.6\% directional accuracy. In the forex domain, \citet{galeshchuk2016} used deep learning for EUR/USD prediction, while \citet{sezer2020} provided a comprehensive survey of financial time series forecasting with deep learning. \citet{wu2020sentiment} explored news sentiment for currency prediction using traditional NLP methods. More recently, \citet{xie2023} and \citet{li2024llm} investigated LLM-based approaches for financial forecasting.
-
-However, several gaps remain: (1) Most studies use simple aggregated sentiment scores rather than theme-specific filtering; (2) The GDELT database, despite its comprehensive global coverage, remains underutilized for forex prediction; (3) No prior work has combined VMD signal decomposition with GDELT sentiment for isolating the news-driven component of exchange rate movements; (4) LLM-based multi-agent systems with debiased prompting have not been applied to forex prediction; and (5) The USD/INR pair, a managed float regime with unique dynamics, is understudied compared to major pairs like EUR/USD.
-
-\subsection{Proposed Approach}
-
-We propose a multi-phase framework consisting of: (a) VMD-based signal decomposition to isolate the high-frequency noise component of exchange rates, (b) thematic feature engineering that filters 2.5M GDELT articles into four market-relevant themes (Economy, Conflict, Policy, Corporate) with 16 daily features, (c) XGBoost-based danger-day classification and directional prediction, (d) EGARCH volatility modeling combined with GDELT features, (e) regime-switching Monte Carlo simulation for probabilistic forecasting, and (f) a novel debiased multi-persona Gemini AI system with 9 specialized forex analyst agents that provides daily predictions with entropy-based confidence weighting. The key innovation is the combination of signal processing, domain-specific sentiment engineering, and LLM-based multi-agent reasoning to address different aspects of the prediction problem.
-
-\subsection{Experimental Overview \& Main Results}
-
-We evaluate our framework on 362 days of USD/INR exchange rate data (January 2025--January 2026) combined with 2.5 million GDELT news articles. Our danger-day classifier achieves 40\% precision (2$\times$ random baseline), the Gemini V4 hybrid model achieves $\sim$0.3\% average prediction error with 54--58\% directional accuracy, and we discover that political sentiment leads exchange rate movements by 9--12 days. Critically, simpler models (moving average momentum) outperform complex deep learning approaches (LSTM, GRU, Attention) which all produce negative $R^2$ on test data, reinforcing the efficient market hypothesis for exact price prediction while supporting volatility forecasting.
-
-\subsection{Summary of Contributions}
+\subsection{Contributions}
 
 Our main contributions are as follows:
 
 \begin{itemize}[leftmargin=*]
-    \item \textbf{Multi-phase prediction framework:} We introduce a comprehensive pipeline combining VMD signal decomposition, thematic GDELT sentiment features, XGBoost classification, EGARCH volatility modeling, Monte Carlo simulation, and LLM-based multi-agent prediction for USD/INR exchange rates.
-    
-    \item \textbf{Thematic feature engineering from GDELT:} We develop a domain-driven approach that filters 2.5M news articles into four market-relevant themes, producing 16 base features and 80 lagged features, achieving correlations of 0.15--0.23 with the exchange rate noise component, a significant improvement over raw aggregated sentiment (0.08).
-    
-    \item \textbf{Debiased multi-persona LLM system:} We design a novel Gemini AI prediction architecture with 9 specialized forex analyst personas, symmetric bull/bear prompting, randomized direction labels, and entropy-based confidence weighting, achieving $\sim$0.3\% average prediction error.
-    
-    \item \textbf{Empirical findings on lead-lag dynamics:} We discover a 9--12 day lead time between political news sentiment and exchange rate movements, and demonstrate that classification-based approaches (volatility prediction) substantially outperform regression-based approaches (exact price prediction) for this task.
+    \item \textbf{Repository-wide synthesis of a multi-stage research program.} We consolidate the phase-based VMD/GDELT experiments, GARCH and ensemble branches, Gemini persona systems, the newer market-memory-first stack, and the TEPC topology-chaos branch into one coherent paper.
+
+    \item \textbf{A transparent account of where signal actually appears in USD/INR.} We show that raw aggregate Goldstein signal is nearly useless on its own, while thematic filtering, lag analysis, and structured state representations recover delayed and economically interpretable predictive structure.
+
+    \item \textbf{Evidence that off-the-shelf direct forecasting is poorly matched to this market.} ARIMA, SARIMA, GRU, LSTM, Attention, and several news-augmented regressors all underperform simple benchmarks or produce negative $R^2$, whereas volatility classification, market memory, and topology-aware models remain useful.
+
+    \item \textbf{A detailed empirical bridge from LLM prompting to stateful and chaos-aware forecasting.} We document how the repository evolves from Gemini V4 debiased persona systems to the \texttt{final phase} memory-first framework and finally to TEPC, where graph topology and coupled Lorenz dynamics become first-class features.
 \end{itemize}
+
+\begin{figure*}[t]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[node distance=0.9cm]
+    \node[data, text width=12em] (raw) {\textbf{Raw Data Layer}\\USD/INR, GDELT India/USA,\\FRED, trade, cross-asset data};
+
+    \node[phase, right=1.2cm of raw, text width=12em] (phaseabc) {\textbf{Phase A/B/C}\\VMD, thematic filtering,\\danger-day classification};
+
+    \node[phase, right=1.2cm of phaseabc, text width=12em] (classic) {\textbf{Classical Branch}\\EGARCH, ensemble models,\\Monte Carlo forecasts};
+
+    \node[phase, below=1.4cm of classic, text width=12em] (gemini) {\textbf{Gemini Track}\\V1--V5 multi-persona\\LLM forecasting};
+
+    \node[phase, left=1.2cm of gemini, text width=12em] (latest) {\textbf{latest/ Refactor}\\Modular pipeline, agents,\\LLM tasks, meta-learner};
+
+    \node[phase, left=1.2cm of latest, text width=12em] (finalphase) {\textbf{final phase}\\Market memory, walk-forward\\ablations, LLM matrix};
+
+    \node[phase, right=1.2cm of gemini, text width=12em] (tepc) {\textbf{TEPC}\\Topology, Laplacian features,\\coupled chaos, persona overlay};
+
+    \draw[arrow] (raw) -- (phaseabc);
+    \draw[arrow] (phaseabc) -- (classic);
+    \draw[arrow] (classic) -- (gemini);
+    \draw[arrow] (gemini) -- (latest);
+    \draw[arrow] (latest) -- (finalphase);
+    \draw[arrow] (gemini) -- (tepc);
+\end{tikzpicture}}
+\caption{Repository evolution as a research program rather than a single monolithic model. Early signal extraction work (Phase A/B/C) feeds the quantitative branches; Gemini V1--V5 introduces debiased multi-persona forecasting; \texttt{latest/} acts as a modular bridge; \texttt{final phase} formalizes market memory and walk-forward ablations; TEPC extends the program into dynamic topology and chaos-aware forecasting.}
+\label{fig:evolution}
+\end{figure*}
 
 % ============================================================
 % 2. RELATED WORK
 % ============================================================
 \section{Related Work}
 
-\subsection{News Sentiment in Financial Prediction}
+\subsection{Exchange-Rate Forecasting and Volatility Modeling}
 
-The relationship between media content and financial markets has been extensively studied. \citet{tetlock2007} showed that high media pessimism predicts downward market pressure and subsequent reversals, establishing that textual sentiment contains economically meaningful information beyond traditional indicators. \citet{bollen2011} demonstrated that collective mood states derived from Twitter feeds can predict stock market movements. \citet{baker2007} constructed an investor sentiment index using multiple proxies and showed its predictive power for cross-sectional stock returns. In the forex domain, \citet{wu2020sentiment} applied NLP-based sentiment analysis to news articles for currency prediction, finding modest but statistically significant improvements over baseline models. \citet{nassirtoussi2014} provided a comprehensive survey on text mining for market prediction in the forex domain.
+Exchange-rate predictability has long been constrained by the Meese--Rogoff result that structural models struggle to outperform naive random-walk baselines out of sample \citep{meese1983}. Later syntheses emphasized that no single specification consistently dominates across periods and regimes \citep{rossi2013, engel2014}. On the volatility side, GARCH-class models remain foundational because they explicitly model clustering and asymmetric shock transmission \citep{bollerslev1986, nelson1991}. Recent applied work has expanded into boosted trees and deep learning, but systematic reviews still report instability, overfitting, and sensitivity to sample regime and feature design \citep{chen2016xgboost, sezer2020}. Our repository-level findings align with this literature: classical volatility structure remains useful, but direct point forecasting is fragile.
 
-\textbf{Gap addressed by this paper:} Prior work predominantly uses simple aggregated sentiment scores that fail to capture theme-specific signals. Our thematic filtering approach (Economy, Conflict, Policy, Corporate themes) yields substantially higher correlations (0.23) compared to unfiltered aggregation (0.08).
+\subsection{News Sentiment, GDELT, and Event-Derived Market Features}
 
-\subsection{Exchange Rate Modeling \& Volatility Forecasting}
+Textual information has long been used as an alternative source of financial signal. Media pessimism can forecast subsequent price pressure \citep{tetlock2007}; large-scale collective mood measures can carry short-horizon market information \citep{bollen2011}; and text mining has become a recurring theme in financial prediction research \citep{nassirtoussi2014, wu2020sentiment}. GDELT is especially attractive because it exposes structured event metadata, Goldstein conflict-cooperation scores, tone values, and mention counts at global scale \citep{leetaru2013}. The gap addressed here is not access to news data per se, but the need to move beyond naive aggregation. The repository shows that raw aggregate scores are weak, while theme filtering, lag design, and event-intensity engineering create more useful features.
 
-Since the \citet{meese1983} puzzle demonstrating that structural models cannot outperform random walks for exchange rate prediction, extensive research has explored alternative approaches. \citet{rossi2013} provided a comprehensive review of exchange rate predictability, concluding that no single model consistently outperforms. \citet{bollerslev1986} introduced GARCH models for volatility clustering, and \citet{nelson1991} proposed EGARCH to capture asymmetric leverage effects. \citet{chen2016xgboost} introduced XGBoost, which has become a standard tool in financial prediction due to its effectiveness on tabular data. Recent work by \citet{sezer2020} surveyed deep learning approaches (LSTM, GRU, Transformer) for financial time series, reporting mixed results. \citet{dragomiretskiy2014} proposed Variational Mode Decomposition (VMD), which has been increasingly applied to financial signal processing.
+\subsection{LLMs, Multi-Agent Reasoning, and Finance}
 
-\textbf{Gap addressed by this paper:} We combine VMD signal decomposition with GDELT sentiment features to specifically target the news-driven volatility component, rather than attempting to predict the full exchange rate, a key distinction that addresses the Meese-Rogoff puzzle.
-
-\subsection{Large Language Models for Financial Forecasting}
-
-The application of LLMs to financial prediction is an emerging research area. \citet{lopez2023} explored GPT-based models for financial sentiment analysis. \citet{xie2023} demonstrated that LLMs show promise in financial reasoning tasks. \citet{li2024llm} investigated multi-agent LLM systems for financial decision-making. \citet{wu2023bloomberggpt} developed BloombergGPT, a domain-specific LLM for finance. Recent work has explored prompt engineering strategies including chain-of-thought \citep{wei2022} and multi-persona frameworks for diverse reasoning.
-
-\textbf{Gap addressed by this paper:} We introduce the first debiased multi-persona LLM system specifically designed for forex prediction, with symmetric case presentation, randomized direction labels, and entropy-based confidence weighting to mitigate known LLM biases toward anchoring and overconfidence. Critically, we provide explicit theoretical grounding for why multi-persona LLM ensembles can produce economically meaningful signals despite LLMs being next-token predictors (see Section~3.7).
+LLMs have recently been studied as financial reasoners, sentiment extractors, and agent-like forecasters \citep{lopez2023, xie2023, wu2023bloomberggpt, li2024llm}. Prompt engineering and multi-agent decomposition are often used to diversify reasoning paths \citep{wei2022}. Yet the application of LLMs to numerical FX forecasting remains under-specified: the main risks are anchoring on recent price, prompt bias, narrative overconfidence, and lack of temporal learning. The repository addresses these issues in two ways. First, Gemini V4 introduces explicit debiasing via symmetric prompting, randomized direction order, and adaptive weighting. Second, the later \texttt{final phase} and TEPC systems reduce raw price exposure altogether by giving personas structured memory snapshots instead of unmediated spot-price context.
 
 % ============================================================
-% 3. METHODOLOGY
+% 3. REPOSITORY-WIDE RESEARCH DESIGN
 % ============================================================
-\section{Methodology}
+\section{Repository-Wide Research Design}
 
-\subsection{Overview}
+This paper is built from saved code, reports, plots, and output artifacts spanning the entire repository. Some branches are historical, others are current; some target volatility, others next-day price, and others breakout classification. Table~\ref{tab:repo_tracks} summarizes how these branches fit together.
 
-Our framework follows a multi-phase pipeline, as illustrated in Figure~\ref{fig:pipeline}. The system processes raw exchange rate data and 2.5 million GDELT news articles through four phases: (A) signal decomposition, (B) thematic feature engineering, (C) volatility classification, and (D) multi-model prediction. The pipeline produces three types of outputs: binary danger-day signals, probabilistic forecasts, and daily point predictions.
-
-\begin{figure*}[t]
+\begin{table*}[t]
 \centering
+\small
+\caption{Major research tracks represented in the repository.}
+\label{tab:repo_tracks}
 \resizebox{\textwidth}{!}{%
-\begin{tikzpicture}[node distance=1.1cm]
-    % Input
-    \node[data, text width=16em] (input) {\textbf{Input Data}\\Exchange Rates (256 days)\\+ 2.5M GDELT Articles};
-    
-    % Phase A
-    \node[phase, below=of input, text width=14em] (phaseA) {Phase A: VMD Signal\\Decomposition};
-    \node[label, right=0.2cm of phaseA] {$\rightarrow$ IMF$_1$, IMF$_2$, IMF$_3$};
-    
-    % Phase B
-    \node[phase, below=of phaseA, text width=14em] (phaseB) {Phase B: Thematic Feature\\Engineering};
-    \node[label, right=0.2cm of phaseB] {$\rightarrow$ 16 base $\times$ 5 lags = 80 feat.};
-    
-    % Phase C
-    \node[phase, below=of phaseB, text width=14em] (phaseC) {Phase C: XGBoost\\Classification};
-    \node[label, right=0.2cm of phaseC] {$\rightarrow$ Danger/Safe, UP/DOWN/STABLE};
-    
-    % Phase D
-    \node[phase, below=1.3cm of phaseC, text width=14em] (phaseD) {Phase D: Multi-Model\\Prediction};
-    
-    % Three output models
-    \node[block, below left=1.2cm and 1.2cm of phaseD, fill=teal!15, text width=9em] (egarch) {\textbf{EGARCH +}\\\textbf{XGBoost}\\Volatility modeling};
-    \node[block, below=1.2cm of phaseD, fill=cyan!15, text width=9em] (mc) {\textbf{Monte Carlo}\\Probabilistic forecasts};
-    \node[block, below right=1.2cm and 1.2cm of phaseD, fill=violet!15, text width=9em] (gemini) {\textbf{Gemini V4}\\LLM multi-persona};
-    
-    % Final output
-    \node[output, below=1.2cm of mc, text width=14em] (out) {\textbf{Outputs}: Point predictions,\\Volatility signals, Prob.\ ranges};
-    
-    % Arrows
-    \draw[arrow] (input) -- (phaseA);
-    \draw[arrow] (phaseA) -- (phaseB);
-    \draw[arrow] (phaseB) -- (phaseC);
-    \draw[arrow] (phaseC) -- (phaseD);
-    \draw[arrow] (phaseD) -- (egarch);
-    \draw[arrow] (phaseD) -- (mc);
-    \draw[arrow] (phaseD) -- (gemini);
-    \draw[arrow] (egarch) -- (out);
-    \draw[arrow] (mc) -- (out);
-    \draw[arrow] (gemini) -- (out);
-\end{tikzpicture}}
-\caption{End-to-end pipeline of the proposed USD/INR prediction framework. Phase~A decomposes the exchange rate signal via VMD; Phase~B engineers thematic features from GDELT; Phase~C classifies volatility; Phase~D produces predictions via three complementary model families.}
-\label{fig:pipeline}
-\end{figure*}
+\begin{tabular}{p{2.2cm}p{3.2cm}p{4.8cm}p{4.8cm}}
+\toprule
+\textbf{Track} & \textbf{Core Files / Folders} & \textbf{Primary Research Question} & \textbf{Saved Artifacts Used Here} \\
+\midrule
+Phase A/B/C & \texttt{phase-a/}, \texttt{Phase-B/}, \texttt{Phase-C/} & Can decomposed and thematically filtered news signal identify IMF$_3$-style volatility and danger days? & \texttt{correlation\_results.csv}, \texttt{classifier\_performance.png}, \texttt{balanced\_confusion\_matrix.png}, lead-lag reports \\
+GARCH branch & \texttt{GARCH/} & Does EGARCH plus engineered news/macro covariates improve return and volatility modeling? & \texttt{garch\_comparison.csv}, \texttt{feature\_importance.csv}, EGARCH plots \\
+Ensemble / Monte Carlo & \texttt{ensemble\_model/}, \texttt{monte\_carlo\_simulation/} & Which quantitative family survives the USD/INR forecasting task, and what is the right uncertainty representation? & \texttt{ultimate\_model\_metrics.csv}, \texttt{ultimate\_weights.csv}, Monte Carlo statistics and fan-chart outputs \\
+Gemini personas & \texttt{gemini\_preds/} & Can a debiased multi-persona LLM system improve short-horizon forecasts? & \texttt{simulation\_summary\_v3.csv}, \texttt{simulation\_summary\_v4.csv}, Jan 2026 live outputs \\
+\texttt{latest/} & \texttt{latest/} & How should the older Gemini workflows be modularized into tasks, agents, cache, and meta-learning? & Treated here as an architectural bridge; the folder contains code but not a directly comparable saved plot suite \\
+\texttt{final phase} & \texttt{final phase/} & Does a market-memory-first, walk-forward, embargoed hybrid system outperform raw feature stacks and persona-only baselines? & \texttt{ablation\_summary.csv}, \texttt{run\_summary.md}, multi-run comparison plots \\
+TEPC & \texttt{TEPC/} & Does topology plus coupled chaos create a stronger breakout/return forecasting representation for INR/USD? & strict raw-GDELT and livepull run summaries, plot panels, persona overlay comparisons \\
+\bottomrule
+\end{tabular}}
+\end{table*}
 
-\subsection{Phase A: Signal Decomposition via VMD}
+Two methodological cautions follow from this design. First, the paper reports \textit{branch-native} metrics rather than forcing all outputs onto an artificial unified leaderboard. Second, only reproducible artifacts present in the repository are reported numerically. The user request mentioned ARDL and DMI-style comparisons, but no versioned executable ARDL or DMI output files were present in the repository snapshot. We therefore report only implemented baselines rather than retrofitting undocumented numbers.
 
-Exchange rates contain multiple components: a long-term trend driven by macroeconomic fundamentals, medium-term business cycles, and high-frequency noise influenced by daily news and market psychology. Since news can primarily affect only the noise component, we separate these using Variational Mode Decomposition (VMD) \citep{dragomiretskiy2014}.
+% ============================================================
+% 4. DATA AND METHODOLOGY
+% ============================================================
+\section{Data and Methodology}
 
-VMD decomposes a signal $f(t)$ into $K$ intrinsic mode functions (IMFs) $u_k(t)$ by solving the constrained optimization problem:
+\subsection{Data Layers}
 
+The repository integrates several data layers rather than a single flat table. At minimum these include daily USD/INR levels, India and USA GDELT event streams, FRED macro variables, bilateral Goldstein aggregates, thematic GDELT summaries, and later graph-structured TEPC node feeds. Table~\ref{tab:datasets} lists the most important datasets used across branches.
+
+\begin{table*}[t]
+\centering
+\small
+\caption{Core datasets used across the repository.}
+\label{tab:datasets}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lllll}
+\toprule
+\textbf{Dataset} & \textbf{Role} & \textbf{Rows / Records} & \textbf{Date Range} & \textbf{Notes} \\
+\midrule
+\texttt{india\_news\_gz\_combined\_sorted.csv} & Raw India GDELT news & 2,546,999 & 2025-01-01 to 2025-12-28 & Main India event archive used for thematic filtering and TEPC raw aggregation \\
+\texttt{usa\_news\_combined\_sorted.csv} & Raw USA GDELT news & 14,377,323 & 2025-01-01 to 2025-12-30 & Cross-country comparison and TEPC raw USD-macro news nodes \\
+\texttt{usd\_inr\_exchange\_rates\_1year.csv} & Daily FX level & 255 & 2024-12-30 to 2025-12-29 & One-year USD/INR series used by early scripts \\
+\texttt{Phase-B/merged\_training\_data.csv} & Thematic + IMF$_3$ training frame & 254 & 2025-01-02 to 2025-12-26 & Central file for Phase-B/Phase-C/GARCH-style workflows \\
+\texttt{combined\_goldstein\_exchange\_rates.csv} & Bilateral Goldstein layer & 253 & 2025-01-02 to 2025-12-29 & India/USA Goldstein summaries merged with USD/INR \\
+\texttt{political\_news\_exchange\_merged.csv} & Political news aggregate layer & 252 & 2025-01-02 to 2025-12-24 & Event count, tone dispersion, Goldstein mean/std \\
+\texttt{Super\_Master\_Dataset.csv} & Long-horizon macro master frame & 1,825 & 2019-01-02 to 2026-01-15 & Main multi-source dataset for later refactors and memory-based systems \\
+\texttt{TEPC} live/strict feature frames & Graph-structured node panels & 214 strict rows; 321 livepull rows & strict: 2025-02-13 to 2025-12-24; livepull feature range: 2025-01-14 to 2026-04-10 & Derived inside TEPC runs rather than stored as one canonical root CSV \\
+\bottomrule
+\end{tabular}}
+\end{table*}
+
+\subsection{Phase A: Variational Mode Decomposition}
+
+The first major methodological decision in the repository is to \textit{not} predict the raw USD/INR price with news. Instead, Phase A decomposes the exchange-rate signal into lower-frequency structure and high-frequency residual noise using Variational Mode Decomposition (VMD) \citep{dragomiretskiy2014}. The intuition is simple: macro fundamentals drive the long-run trend, while news is more likely to modulate the short-horizon residual.
+
+Let $f(t)$ denote the exchange-rate series. VMD seeks modes $u_k(t)$ and center frequencies $\omega_k$ by minimizing the total bandwidth of the demodulated modes subject to reconstruction:
 \begin{equation}
-\min_{\{u_k\},\{\omega_k\}} \left\{ \sum_{k=1}^{K} \left\| \partial_t \left[ \left( \delta(t) + \frac{j}{\pi t} \right) * u_k(t) \right] e^{-j\omega_k t} \right\|_2^2 \right\}
+\min_{\{u_k\},\{\omega_k\}}
+\sum_{k=1}^{K}
+\left\|
+\partial_t
+\left[
+\left(\delta(t) + \frac{j}{\pi t}\right) * u_k(t)
+\right]
+e^{-j\omega_k t}
+\right\|_2^2
+\quad \text{s.t.} \quad \sum_{k=1}^{K} u_k = f.
 \end{equation}
-\begin{equation}
-\text{subject to} \quad \sum_{k=1}^{K} u_k = f
-\end{equation}
 
-where $\omega_k$ is the center frequency of each mode and $\alpha$ is the bandwidth constraint parameter. We set $K=3$ (trend, cycle, noise), $\alpha=2000$, and tolerance $\epsilon=10^{-7}$.
-
-The three resulting modes are:
-\begin{itemize}
-    \item $\text{IMF}_1$: Long-term trend (macroeconomic fundamentals)
-    \item $\text{IMF}_2$: Medium-term cycle (business cycles)  
-    \item $\text{IMF}_3$: High-frequency noise (news-driven volatility), our prediction target
-\end{itemize}
-
-We chose VMD over alternatives (EMD, CEEMDAN) due to its optimization-based formulation, freedom from mode mixing, and established effectiveness in financial applications.
+The repository uses $K=3$ modes and targets IMF$_3$, the highest-frequency component, as the volatility/noise layer most likely to absorb daily news shocks. This decomposition step is one of the most important conceptual choices in the project: it reframes the problem away from exact long-run valuation and toward event-sensitive movement intensity.
 
 \begin{figure}[t]
 \centering
-\resizebox{\columnwidth}{!}{%
-\begin{tikzpicture}[node distance=0.8cm]
-    % Input signal
-    \node[data, text width=12em] (signal) {\textbf{USD/INR Exchange Rate}\\$f(t)$, 256 daily observations};
-    
-    % VMD box
-    \node[phase, below=1cm of signal, text width=12em] (vmd) {VMD Decomposition\\$K=3$, $\alpha=2000$};
-    
-    % Three IMFs
-    \node[block, below left=1.3cm and 1.8cm of vmd, fill=blue!10, text width=8em] (imf1) {\textbf{IMF$_1$: Trend}\\Macro fundamentals\\{\scriptsize (slow, smooth)}};
-    \node[block, below=1.3cm of vmd, fill=yellow!15, text width=8em] (imf2) {\textbf{IMF$_2$: Cycle}\\Business cycles\\{\scriptsize (medium freq.)}};
-    \node[block, below right=1.3cm and 1.8cm of vmd, fill=red!12, text width=8em] (imf3) {\textbf{IMF$_3$: Noise}\\News-driven volatility\\{\scriptsize (high frequency)}};
-    
-    % Target highlight
-    \node[draw=red, thick, dashed, rounded corners, fit=(imf3), inner sep=4pt, label={[font=\scriptsize\bfseries, text=red]below:Prediction Target}] {};
-    
-    % Arrows
-    \draw[arrow] (signal) -- (vmd);
-    \draw[arrow] (vmd) -- (imf1);
-    \draw[arrow] (vmd) -- (imf2);
-    \draw[arrow] (vmd) -- (imf3);
-\end{tikzpicture}}
-\caption{VMD signal decomposition separates the USD/INR exchange rate into three intrinsic mode functions. IMF$_3$ (noise component) captures news-driven volatility and serves as the prediction target for Phase~B--C.}
+\includegraphics[width=\columnwidth]{ensemble_vmd_decomposition.png}
+\caption{Representative VMD decomposition output saved by the ensemble branch. The decomposition separates the USD/INR series into trend, seasonal/cyclic, and noise-like components, with the high-frequency component treated as the most news-sensitive target in the early phases of the project.}
 \label{fig:vmd}
 \end{figure}
 
-\subsection{Phase B: Thematic Feature Engineering}
+\subsection{Phase B: Thematic Filtering and Lag Engineering}
 
-Rather than computing simple aggregated sentiment scores across all articles, we implement a domain-driven thematic filtering approach. We define four market-relevant themes based on established knowledge of currency market drivers:
-
-\begin{enumerate}
-    \item \textbf{Economy} (139,953 articles): Keywords include \textit{RBI, inflation, interest rate, GDP, forex, reserve, rupee, monetary policy, fiscal, budget}. Central bank policy and economic indicators directly affect currency valuation.
-    
-    \item \textbf{Conflict} (560,938 articles): Keywords include \textit{protest, strike, tension, dispute, attack, conflict, crisis, military, border}. Geopolitical instability increases risk premium.
-    
-    \item \textbf{Policy} (594,924 articles): Keywords include \textit{government, legislation, regulation, bill, parliament, cabinet, minister, policy}. Regulatory changes affect business confidence.
-    
-    \item \textbf{Corporate} (53,779 articles): Keywords include \textit{Adani, Reliance, Tata, Infosys, TCS, merger, acquisition, corporate}. Major corporate events signal economic health.
+Naive sentiment aggregation proved too weak for this market. The repository therefore moves to domain-driven thematic filtering, grouping India-related GDELT articles into four currency-relevant themes:
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Economy} (139,953 articles): RBI policy, inflation, GDP, forex, reserves, trade, taxation.
+    \item \textbf{Conflict} (560,938 articles): protests, crisis, border tension, attacks, strikes, military events.
+    \item \textbf{Policy} (594,924 articles): cabinet actions, legislation, ministerial and parliamentary policy events.
+    \item \textbf{Corporate} (53,779 articles): major Indian corporates, mergers, scandals, acquisitions, firm-specific shocks.
 \end{enumerate}
 
-For each trading day, we compute 16 features:
-
-\begin{itemize}
-    \item \textbf{Sentiment features} (5): Average tone per theme and overall:\\$\text{Tone}_{\text{Econ}}$, $\text{Tone}_{\text{Conf}}$, $\text{Tone}_{\text{Pol}}$, $\text{Tone}_{\text{Corp}}$, $\text{Tone}_{\text{All}}$
-    \item \textbf{Goldstein features} (2): Average Goldstein scale ($\text{Goldstein}_{\text{Avg}}$) and impact-weighted score
-    \begin{equation*}
-    \text{Goldstein}_{\text{Wtd}} = \textstyle\sum \text{Goldstein}_i \times \text{NumMentions}_i
-    \end{equation*}
-    \item \textbf{Volume features} (6): Article counts per theme and total
-    \item \textbf{Volume spike features} (3): Day-over-day percentage changes in article volume
-\end{itemize}
-
-The impact-weighted Goldstein score is a key innovation: a Goldstein score of $-10$ mentioned 5 times ($-50$) has fundamentally different market impact than one mentioned 5,000 times ($-50,000$).
-
-\begin{figure}[t]
-\centering
-\includegraphics[width=\columnwidth]{plot.png}
-\caption{Thematic feature engineering pipeline. Raw GDELT articles are filtered into four market-relevant themes, then aggregated into 16 daily features across four categories. This thematic approach yields 3$\times$ higher correlation with exchange rate volatility compared to raw aggregation.}
-\label{fig:thematic}
-\end{figure}
-
-\subsection{Phase C: Volatility Classification}
-
-We frame the prediction problem as binary classification rather than regression, defining ``danger days'' as the top 20\% of days by $|\text{IMF}_3|$ magnitude. This threshold creates a realistic 80/20 class imbalance matching observed market conditions.
-
-For each of the 16 base features, we create 5 lagged versions (lag 1--5 days), yielding an 80-dimensional feature space. We train an XGBoost classifier \citep{chen2016xgboost} with:
-
-\begin{itemize}
-    \item Class imbalance handling via \texttt{scale\_pos\_weight}
-    \item Maximum depth of 4 to prevent overfitting
-    \item Learning rate of 0.1 with 100 estimators
-    \item Time-series-aware train/test split (80\%/20\%, chronological)
-\end{itemize}
-
-The decision threshold is optimized to maximize F1-score, yielding an optimal threshold of 0.38 (below the default 0.5 due to class imbalance). We additionally train a 3-class directional classifier (UP/DOWN/STABLE) using Random Forest.
-
-\subsection{EGARCH Volatility Modeling}
-
-To capture volatility clustering and asymmetric shock responses in USD/INR returns, we fit an EGARCH(1,1) model \citep{nelson1991} with Skew-$t$ innovations:
-
+From these themes the repository constructs 16 daily features spanning tone, Goldstein, counts, and spike variables. A key engineered feature is the impact-weighted Goldstein score:
 \begin{equation}
-\log(\sigma_t^2) = \omega + \alpha |z_{t-1}| + \gamma z_{t-1} + \beta \log(\sigma_{t-1}^2)
+\text{Goldstein}_{\text{weighted}} = \sum_i \text{GoldsteinScale}_i \times \text{NumMentions}_i,
 \end{equation}
+which distinguishes between a low-attention event and a widely propagated market shock. Later branches extend the same logic into rolling averages, signed log transforms, event heat, and shared memory pressure variables.
 
-where $z_t = r_t / \sigma_t$ are standardized residuals, and $\gamma < 0$ captures the leverage effect (negative shocks amplify volatility more than positive shocks). We combine EGARCH-estimated conditional volatility with GDELT features in a hybrid XGBoost model for enhanced return prediction.
+\begin{figure*}[t]
+\centering
+\begin{subfigure}[t]{0.58\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{phase_b_theme_pipeline.png}
+    \caption{Theme-filtering and aggregation pipeline used to turn raw GDELT into daily features.}
+\end{subfigure}
+\hfill
+\begin{subfigure}[t]{0.38\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{phase_b_heatmap.png}
+    \caption{Correlation heatmap from the Phase-B outputs.}
+\end{subfigure}
+\caption{Phase-B transforms raw GDELT event streams into market-relevant daily features rather than using undifferentiated aggregate tone.}
+\label{fig:phaseb}
+\end{figure*}
 
-\subsection{Monte Carlo Simulation}
+\subsection{Phase C: Danger-Day Classification}
 
-We implement four Monte Carlo simulation variants for probabilistic 30-day forecasting (10,000 paths each):
+Phase C formalizes a classification problem instead of a direct price-regression problem. ``Danger days'' are defined as the top 20\% of observations by IMF$_3$ magnitude. For each of the 16 base features, 5 lagged variants are created, yielding an 80-dimensional feature space. The saved \texttt{danger\_signal\_classifier.py} implementation uses XGBoost with class-imbalance handling and an F1-optimized decision threshold.
 
-\begin{enumerate}
-    \item \textbf{Standard GBM}: $dS = \mu S \, dt + \sigma S \, dW$ with constant parameters.
-    
-    \item \textbf{Regime-Switching} (recommended): Volatility switches between high ($\sigma_H = 0.351\%$ daily) and low ($\sigma_L = 0.196\%$ daily) states based on news volume thresholds.
-    
-    \item \textbf{Jump Diffusion}: Augments GBM with Poisson-distributed jump events to model rare tail events.
-    
-    \item \textbf{Sentiment-Augmented}: Adjusts drift by incorporating a 7-day rolling average of news tone.
-\end{enumerate}
+This framing is central to the paper's argument. In a market where exact next-day price is hard to predict, a classifier that says ``tomorrow is likely to be abnormal'' can still be practically valuable for hedging, risk limits, and treasury execution. The repository's downstream findings consistently support this volatility-first view.
 
-\subsection{Debiased Multi-Persona Gemini AI System (V4)}
+\subsection{Quantitative Forecast Families: EGARCH, Ensemble Models, and Monte Carlo}
 
-Our most novel contribution is a debiased multi-persona LLM prediction system that simulates a multi-analyst trading floor. The architecture consists of three stages: statistical prediction, LLM ensemble, and adaptive weight fusion. Figure~\ref{fig:gemini} illustrates the full system.
+The middle repository branches explore three complementary quantitative strategies.
+
+\paragraph{EGARCH and hybrid volatility modeling.}
+The EGARCH branch models log variance to capture asymmetric shock effects:
+\begin{equation}
+\log(\sigma_t^2) = \omega + \alpha |z_{t-1}| + \gamma z_{t-1} + \beta \log(\sigma_{t-1}^2).
+\end{equation}
+This branch also layers XGBoost over EGARCH-derived and news-derived covariates, allowing conditional volatility to act as a structural prior while tree models absorb nonlinear macro and sentiment interactions.
+
+\paragraph{Large ensemble comparison.}
+The ensemble branch evaluates ARIMA, SARIMA, Holt--Winters, GARCH, Monte Carlo, GDELT regressors, VMD trend models, deep learning models (LSTM, GRU, Attention), and a final optimized ensemble. This branch is valuable precisely because it documents many failures. Rather than assuming that more complexity is better, it records where model families collapse under realistic USD/INR conditions.
+
+\paragraph{Monte Carlo scenario forecasting.}
+The Monte Carlo branch shifts from point prediction to distributions. Four variants are saved: standard GBM, regime-switching, jump diffusion, and sentiment-augmented drift. This branch is best interpreted as a risk and scenario engine rather than a direct competition for next-day point accuracy.
+
+\subsection{Gemini V4: Debiased Multi-Persona LLM Forecasting}
+
+The Gemini track evolves through several versions, but V4 is the crucial one. It combines a statistical predictor with a 9-persona LLM committee and explicitly targets the failure modes seen in earlier prompting approaches: anchoring, primacy effects, and overconfident directional bias. The personas include macro, rates, flow, RBI, commodity, technical, sentiment, risk, and quant roles.
 
 \begin{figure*}[t]
 \centering
 \resizebox{\textwidth}{!}{%
 \begin{tikzpicture}[node distance=0.7cm, every node/.style={font=\small}]
-    % Data ingestion
-    \node[data, text width=16em] (data) {\textbf{Data Ingestion}\\Exchange rates, DXY, US10Y,\\Oil, Gold, GDELT news};
-    
-    % Two parallel branches
-    \node[block, below left=1.2cm and 3.5cm of data, fill=teal!12, text width=10em] (stat) {\textbf{Statistical Model}\\Ridge Regression\\(5-fold CV, 60-day)};
-    \node[block, below right=1.2cm and 1.5cm of data, fill=violet!12, text width=10em] (llm) {\textbf{LLM Ensemble}\\9 Gemini Personas\\Debiased prompts};
-    
-    % Stat outputs
+    \node[data, text width=16em] (data) {\textbf{Data Ingestion}\\Exchange rates, DXY, US10Y, oil, gold, GDELT, news digest};
+
+    \node[block, below left=1.2cm and 3.4cm of data, fill=teal!12, text width=10em] (stat) {\textbf{Statistical Model}\\Ridge regression\\with CV};
+    \node[block, below right=1.2cm and 1.6cm of data, fill=violet!12, text width=10em] (llm) {\textbf{LLM Ensemble}\\9 Gemini personas\\with debiased prompts};
+
     \node[label, below=0.3cm of stat, text width=10em, align=center] (statout) {$\hat{y}_{\text{stat}}$, 95\% CI, $R^2$};
-    
-    % Persona grid (3x3)
-    \node[persona, below=0.8cm of llm, xshift=-2.2cm, text width=6em, minimum height=3em] (p1) {Macro\\Analyst\\\textbf{15\%}};
-    \node[persona, right=0.15cm of p1, text width=6em, minimum height=3em] (p2) {Rates\\Strategist\\\textbf{13\%}};
-    \node[persona, right=0.15cm of p2, text width=6em, minimum height=3em] (p3) {Flow\\Trader\\\textbf{12\%}};
-    \node[persona, below=0.2cm of p1, text width=6em, minimum height=3em] (p4) {RBI\\Watcher\\\textbf{12\%}};
-    \node[persona, right=0.15cm of p4, text width=6em, minimum height=3em] (p5) {Commodity\\Analyst\\\textbf{12\%}};
-    \node[persona, right=0.15cm of p5, text width=6em, minimum height=3em] (p6) {Technical\\Analyst\\\textbf{10\%}};
-    \node[persona, below=0.2cm of p4, text width=6em, minimum height=3em] (p7) {Sentiment\\Analyst\\\textbf{10\%}};
-    \node[persona, right=0.15cm of p7, text width=6em, minimum height=3em] (p8) {Risk\\Manager\\\textbf{8\%}};
-    \node[persona, right=0.15cm of p8, text width=6em, minimum height=3em] (p9) {Quant\\Researcher\\\textbf{8\%}};
-    
-    % Aggregation — centered below persona grid
-    \node[block, below=0.6cm of p8, fill=orange!15, text width=10em] (agg) {\textbf{Robust Aggregation}\\Trimmed weighted mean\\Entropy confidence};
-    
-    % Adaptive weighting — centered below data
-    \node[phase, below=1cm of agg, xshift=-3.5cm, text width=14em] (adapt) {Adaptive Weight Calc.\\$w_{\text{stat}}\!\in\![55,85]\%$, $w_{\text{llm}}\!\in\![15,45]\%$};
-    
-    % Final prediction
-    \node[output, below=0.8cm of adapt, text width=16em] (final) {\textbf{Final Prediction}\\$\hat{y} = \hat{y}_{\text{stat}} \times (1 + \text{adj} \times w_{\text{llm}})$};
-    
-    % Arrows — data to branches
+
+    \node[persona, below=0.8cm of llm, xshift=-2.2cm] (p1) {Macro\\15\%};
+    \node[persona, right=0.15cm of p1] (p2) {Rates\\13\%};
+    \node[persona, right=0.15cm of p2] (p3) {Flow\\12\%};
+    \node[persona, below=0.2cm of p1] (p4) {RBI\\12\%};
+    \node[persona, right=0.15cm of p4] (p5) {Commodity\\12\%};
+    \node[persona, right=0.15cm of p5] (p6) {Technical\\10\%};
+    \node[persona, below=0.2cm of p4] (p7) {Sentiment\\10\%};
+    \node[persona, right=0.15cm of p7] (p8) {Risk\\8\%};
+    \node[persona, right=0.15cm of p8] (p9) {Quant\\8\%};
+
+    \node[block, below=0.6cm of p8, fill=orange!15, text width=10em] (agg) {\textbf{Aggregation}\\Trimmed weighted mean\\Entropy confidence};
+    \node[phase, below=1cm of agg, xshift=-3.4cm, text width=14em] (adapt) {Adaptive Weighting\\$w_{\text{stat}}\in[55,85]\%$\\$w_{\text{llm}}\in[15,45]\%$};
+    \node[output, below=0.8cm of adapt, text width=15em] (final) {\textbf{Final Forecast}\\Statistical anchor +\\LLM adjustment};
+
     \draw[arrow] (data) -- (stat);
     \draw[arrow] (data) -- (llm);
-    % LLM fans into all three top-row personas
     \draw[arrow] (llm.south) -- ++(0,-0.3cm) -| (p1.north);
     \draw[arrow] (llm.south) -- ++(0,-0.3cm) -| (p2.north);
     \draw[arrow] (llm.south) -- ++(0,-0.3cm) -| (p3.north);
-    % Bottom row personas to aggregation
     \draw[arrow] (p7) -- (agg);
     \draw[arrow] (p8) -- (agg);
     \draw[arrow] (p9) -- (agg);
-    % Left branch: stat straight down to adaptive
     \draw[arrow] (statout.south) -- (statout.south |- adapt.west) -- (adapt.west);
-    % Right branch: aggregation straight down to adaptive
     \draw[arrow] (agg) -- (adapt);
-    % Adaptive to final
     \draw[arrow] (adapt) -- (final);
 \end{tikzpicture}}
-\caption{Gemini V4 multi-persona prediction architecture. A statistical Ridge Regression model and a 9-persona LLM ensemble operate in parallel. Persona predictions are robustly aggregated and combined with the statistical model via adaptive weighting based on entropy confidence, $R^2$, and volatility regime.}
-\label{fig:gemini}
+\caption{Gemini V4 architecture as represented in the repository's historical LLM track. The LLM does not replace the statistical model; it perturbs and annotates it.}
+\label{fig:gemini_arch}
 \end{figure*}
 
-\subsubsection{Statistical Model}
-
-A Ridge Regression model with 5-fold cross-validation on a 60-day lookback window produces point predictions using features: US10Y yield, gold price, DXY index, India average tone, oil price, and 20-day realized volatility. The model outputs a prediction $\hat{y}_\text{stat}$, a 95\% confidence interval, and an $R^2$ score.
-
-\subsubsection{LLM Ensemble}
-
-Nine specialized personas query Google Gemini AI independently:
-
-\begin{table}[t]
-\centering
-\small
-\caption{Gemini V4 Multi-Persona Architecture}
-\label{tab:personas}
-\begin{tabular}{llc}
-\toprule
-\textbf{Persona} & \textbf{Specialization} & \textbf{Weight} \\
-\midrule
-Macro Analyst & Global monetary policy \& growth differentials & 15\% \\
-Rates Strategist & Yield differentials \& carry trade & 13\% \\
-Flow Trader & FX positioning \& client flows & 12\% \\
-RBI Watcher & India central bank policy & 12\% \\
-Commodity Analyst & Oil/Gold impact on INR & 12\% \\
-Technical Analyst & Price action \& momentum & 10\% \\
-Sentiment Analyst & News sentiment impact & 10\% \\
-Risk Manager & Tail risks \& uncertainty & 8\% \\
-Quant Researcher & Statistical model validation & 8\% \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\subsubsection{Debiasing Techniques}
-
-To mitigate known LLM biases (anchoring, primacy/recency, overconfidence), we employ six techniques illustrated in Figure~\ref{fig:debias}:
-
-\begin{enumerate}
-    \item \textbf{Symmetric case presentation}: Both bull and bear cases are presented with equal weight and detail.
-    \item \textbf{Randomized order}: Bull/bear cases are randomly ordered (50/50) to prevent primacy bias.
-    \item \textbf{Explicit uncertainty}: Statistical confidence intervals and $R^2$ scores are provided.
-    \item \textbf{Persona accountability}: Historical accuracy of each persona is fed back.
-    \item \textbf{Historical bias feedback}: Systematic bias warnings (e.g., ``+0.05\% bullish bias recently'').
-    \item \textbf{Pips-based adjustment}: Responses are constrained to 0--30 pips adjustments.
+V4's debiasing techniques are as important as the personas themselves:
+\begin{enumerate}[leftmargin=*]
+    \item symmetric bull and bear case presentation,
+    \item randomized direction order,
+    \item explicit confidence intervals and statistical model quality,
+    \item persona-level historical accountability,
+    \item bias feedback based on prior directional skew,
+    \item pip-bounded adjustment magnitudes.
 \end{enumerate}
 
-\begin{figure*}[t]
-\centering
-\resizebox{0.85\textwidth}{!}{%
-\begin{tikzpicture}[node distance=0.5cm, every node/.style={font=\small}]
-    % Central node
-    \node[phase, text width=9em] (center) {Debiased\\Prompt Design};
-    
-    % Six techniques around it
-    \node[block, above left=1cm and 1.8cm of center, fill=green!12, text width=8em] (t1) {\textbf{1. Symmetric Cases}\\Equal bull/bear weight};
-    \node[block, above=1.2cm of center, fill=green!12, text width=8em] (t2) {\textbf{2. Random Order}\\50/50 presentation};
-    \node[block, above right=1cm and 1.8cm of center, fill=green!12, text width=8em] (t3) {\textbf{3. Explicit}\\\textbf{Uncertainty}\\CI \& $R^2$ shown};
-    \node[block, below left=1cm and 1.8cm of center, fill=yellow!15, text width=8em] (t4) {\textbf{4. Accountability}\\Persona accuracy\\fed back};
-    \node[block, below=1.2cm of center, fill=yellow!15, text width=8em] (t5) {\textbf{5. Bias Feedback}\\Systematic bias\\warnings};
-    \node[block, below right=1cm and 1.8cm of center, fill=yellow!15, text width=8em] (t6) {\textbf{6. Pips Constraint}\\0--30 pip range limit};
-    
-    % Arrows
-    \draw[arrow] (t1) -- (center);
-    \draw[arrow] (t2) -- (center);
-    \draw[arrow] (t3) -- (center);
-    \draw[arrow] (t4) -- (center);
-    \draw[arrow] (t5) -- (center);
-    \draw[arrow] (t6) -- (center);
-\end{tikzpicture}}
-\caption{Six debiasing techniques applied to LLM prompt construction. Techniques 1--3 (top, green) address prompt-level biases; techniques 4--6 (bottom, yellow) provide feedback-based calibration. Together they reduce anchoring, primacy/recency, and overconfidence biases.}
-\label{fig:debias}
-\end{figure*}
+The later repository branches inherit this lesson: persona systems are useful only when they operate as constrained overlays on top of structured quantitative state.
 
-\subsubsection{Aggregation \& Adaptive Weighting}
+\subsection{\texttt{final phase}: Market-Memory-First Hybrid Forecasting}
 
-Persona predictions are aggregated using a trimmed weighted mean (removing top/bottom 10\% outliers). Entropy-based confidence is computed:
+The \texttt{final phase} system is the most current engineering-oriented branch in the repository. It departs from the earlier Gemini scripts in three ways.
 
+First, it creates a grouped feature frame spanning technical, macro, master-sentiment, Goldstein, thematic, political, and memory features. Second, it introduces a shared market-memory snapshot that compresses recent history into stable state variables: oil pressure, dollar pressure, carry pressure, India stress, bilateral divergence, event heat, volatility stress, reversal pressure, and a regime label. Third, it evaluates everything under walk-forward backtests with an information embargo, rather than using the most recent price as an implicit shortcut. Concretely, the feature builder predicts a forward target shifted by \texttt{forecast\_horizon\_days + embargo\_days}, so the default task becomes a two-day-gap forecast rather than a trivial persistence exercise.
+
+The persona engine in \texttt{final phase} also differs from the older Gemini branch. Rule personas and LLM personas both consume the same structured market memory, and calibration weights are updated from matured forecast outcomes. This makes the system auditable and branch-comparable in a way the earlier ad hoc scripts were not.
+
+\subsection{TEPC: Topology-Enabled Predictions from Chaos}
+
+TEPC is the most conceptually ambitious branch in the repository. It stops treating USD/INR as a single scalar time series and instead models it as a node in a time-varying macro-geopolitical network. The node universe includes direct market nodes such as INRUSD, DXY, BRENT, GOLD, and US10Y, plus composite nodes such as India sentiment, US sentiment, Goldstein spread, geopolitical risk, and theme pressure.
+
+For each rolling window, TEPC computes a correlation matrix across node shock series, converts correlation into distance,
 \begin{equation}
-H = -\sum_{i} p_i \log_2(p_i), \quad \text{confidence} = 1 - \frac{H}{\log_2(N)}
+d_{ij} = \sqrt{\frac{1 - \rho_{ij}}{2}},
 \end{equation}
-
-where $p_i$ is the proportion of personas predicting each direction. The final prediction combines statistical and LLM components with adaptive weights:
-
+and then applies an exponential kernel to obtain a dense adjacency matrix,
 \begin{equation}
-\hat{y}_\text{final} = \hat{y}_\text{stat} \times (1 + \text{llm\_adj} \times w_\text{llm})
+A_{ij} = \exp\!\left(-\frac{d_{ij}}{\sigma}\right), \qquad A_{ii}=0.
 \end{equation}
+From the resulting Laplacian $L = D - A$, TEPC extracts degree, density, Fiedler value, spectral entropy, filtration component counts, and target-node adjacency features.
 
-where $w_\text{llm} \in [0.15, 0.45]$ adapts based on entropy confidence, $R^2$, volatility regime, and recent LLM value-added.
-
-\subsection{Theoretical Grounding: Why LLM Personas Produce Meaningful Signals}
-\label{sec:theoretical}
-
-A critical question arises: LLMs are next-token predictors trained on static text corpora. They do not learn from live price feedback, do not update beliefs unless fine-tuned, and may hallucinate financial reasoning. Why, then, would simulated personas produce economically meaningful signals rather than noise?
-
-We ground our approach in three established theoretical frameworks:
-
-\paragraph{1. Compressed Knowledge Extraction, Not Market Understanding.}
-We do not claim that LLMs ``understand'' markets. Instead, we treat them as \textit{structured information extractors}. LLMs trained on financial news, analyst reports, central bank communications, and economics textbooks encode compressed representations of how human analysts reason about currencies. When prompted with current data (exchange rates, yields, oil prices, sentiment scores), the LLM performs approximate pattern matching against these compressed representations. This is analogous to how a keyword-based retrieval system does not ``understand'' documents but can still extract relevant information. The critical distinction is that the statistical Ridge Regression model provides the quantitative anchor (55--85\% weight), while the LLM provides only a marginal directional adjustment (15--45\% weight, constrained to 0--30 pips). The LLM is never trusted to produce price levels independently.
-
-\paragraph{2. Wisdom of Crowds via Condorcet Jury Theorem.}
-The multi-persona design is grounded in the Condorcet Jury Theorem \citep{condorcet1785}: if each of $N$ independent agents has individual accuracy $p > 0.5$ for a binary decision, the majority vote accuracy approaches 1 as $N$ increases. Our 9 personas are designed to approximate independence through distinct domain specializations (macro policy, commodity flows, technical momentum, political risk, etc.), each attending to different subsets of the input data. Empirically, inter-persona agreement rates range from 60--80\%, confirming partial independence rather than herding. The entropy-based confidence weighting naturally downweights predictions when personas disagree (high entropy $\rightarrow$ low confidence $\rightarrow$ the system defaults to the statistical model), providing a principled mechanism for distinguishing signal from noise.
-
-\paragraph{3. Bounded Rationality and Heuristic Aggregation.}
-Each persona approximates a bounded rational agent \citep{simon1955} operating with domain-specific heuristics. The Macro Analyst applies interest rate parity reasoning, the Commodity Analyst applies oil-rupee correlation heuristics, and the Technical Analyst applies momentum rules. These are not arbitrary: they mirror the actual reasoning frameworks used by human forex traders. The weighted aggregation with trimmed means (removing top/bottom 10\% outlier predictions) is equivalent to a robust M-estimator, which has well-established statistical properties for combining noisy expert forecasts \citep{clemen1989}. This outperforms simple statistical ensembles when individual models capture qualitatively different market dynamics, as our personas are designed to do.
-
-\paragraph{Falsifiability.}
-Our framework makes a testable prediction: if LLM personas produce pure noise, the adaptive weighting mechanism should converge to $w_{\text{llm}} \approx 0$ over time. We observe instead that $w_{\text{llm}}$ stabilizes at 15--33\%, and ablation shows that removing the LLM component degrades directional accuracy by 2--3\% (Section~5.6). This provides empirical evidence that the LLM ensemble contributes non-redundant information beyond the statistical model.
-
-\subsection{Design Choices \& Justification}
-
-Key design decisions include: (1) focusing on classification over regression, motivated by the Meese-Rogoff puzzle; (2) using 4 themes rather than finer granularity, balancing signal separation with overfitting risk; (3) limiting lags to 1--5 days for practical forecasting horizons; (4) selecting XGBoost for tabular data effectiveness with limited samples (362 days); and (5) regime-switching Monte Carlo for its interpretability and data-driven volatility state estimation.
+The chaos layer assigns each node a coupled Lorenz oscillator:
+\begin{align}
+\dot{x} &= \sigma(y - x) - \epsilon(Lx), \\
+\dot{y} &= x(\rho - z) - y - 0.35\epsilon(Ly), \\
+\dot{z} &= xy - \beta z - 0.15\epsilon(Lz),
+\end{align}
+with initial conditions derived deterministically from recent volatility, drift, and range position. TEPC then records synchronization, target-node phase response, finite-time Lyapunov-style divergence, and coupling response as predictive features. A strict configuration further enforces \texttt{response\_lag\_days = 2}, explicitly preventing access to the target day's immediately prior price. This makes TEPC the repository's clearest attempt to escape trivial lag-copying.
 
 % ============================================================
-% 4. EXPERIMENTAL SETUP
+% 5. EXPERIMENTAL SETUP
 % ============================================================
 \section{Experimental Setup}
 
-\subsection{Datasets}
+\subsection{Branch-Specific Evaluation Protocols}
+
+Because the repository is a research program rather than one frozen benchmark, each branch uses the evaluation protocol most appropriate to its question. Table~\ref{tab:protocols} summarizes the main ones used in this paper.
 
 \begin{table*}[t]
 \centering
 \small
-\caption{Summary of datasets used in our experiments.}
-\label{tab:datasets}
+\caption{Evaluation protocols used across major branches.}
+\label{tab:protocols}
 \resizebox{\textwidth}{!}{%
-\begin{tabular}{llllll}
+\begin{tabular}{p{2.3cm}p{4.0cm}p{3.5cm}p{4.4cm}p{3.2cm}}
 \toprule
-\textbf{Dataset} & \textbf{Source} & \textbf{Domain} & \textbf{\# Records} & \textbf{Period} & \textbf{Frequency} \\
+\textbf{Branch} & \textbf{Target} & \textbf{Evaluation Window} & \textbf{Primary Metrics} & \textbf{Key Design Constraint} \\
 \midrule
-India GDELT News & GDELT Project & News Sentiment & 2,546,999 & Jan--Dec 2025 & 15 min \\
-USA GDELT News & GDELT/BigQuery & News Sentiment & $\sim$5,000,000 & Jan--Dec 2025 & 15 min \\
-USD/INR Exchange & Frankfurter API (ECB) & Forex & 256 & Dec 2024--Jan 2026 & Daily \\
-Macro Indicators & FRED & Economics & 256 & Jan 2025--Jan 2026 & Daily \\
-Super Master Dataset & Combined & Multi-source & 223 & Feb--Dec 2025 & Daily \\
+Phase C & IMF$_3$ danger-day classification and 3-class direction & Chronological 80/20 split over Phase-B merged data & precision, recall, F1, accuracy, tuned threshold & Top 20\% IMF$_3$ defines ``danger'' \\
+GARCH & Volatility fit and hybrid return modeling & Full saved branch outputs on 2025 daily data & log-likelihood, AIC, BIC, feature importance & Asymmetry and persistence are first-class outputs \\
+Ensemble / ultimate model comparison & Next-period point forecast comparison & Saved ensemble holdout artifacts & RMSE, MAE, $R^2$, final optimized weights & Many model families are compared under the same branch \\
+Gemini V3/V4 & Next-day price and direction & 2023 full-year saved summary (260 rows) + Jan 2026 live test (21 rows) & mean absolute error \%, sign accuracy, weight ranges & Statistical anchor plus persona adjustment \\
+\texttt{final phase} & Future price, return, direction under walk-forward evaluation & 100-day and 30-day walk-forward backtests & MAE price, RMSE price, MAE return, directional accuracy, sign-F1 & Effective two-day target gap via horizon + embargo \\
+TEPC strict raw & Breakout, forward return, near-term volatility & 80-day walk-forward strict raw-GDELT run & breakout accuracy, macro-F1, MAE return, volatility MAE & Response lag = 2 days; no flat lag-copying \\
+TEPC livepull & Same TEPC tasks on extended node feed & 100-day livepull walk-forward run & breakout accuracy, macro-F1, MAE return & Optional cross-FX and live-news nodes retained when coverage permits \\
 \bottomrule
 \end{tabular}}
 \end{table*}
 
-\begin{sloppypar}
-The GDELT database provides pre-computed \texttt{Goldstein\-Scale} ($-10$ to $+10$, conflict--cooperation), \texttt{Avg\-Tone} ($-100$ to $+100$, sentiment), \texttt{Num\-Mentions}, and CAMEO event codes for each article.
-We use the Frankfurter API (European Central Bank) for daily USD/INR closing rates.
-FRED data includes US~10-Year Treasury yield (DGS10), crude oil (DCOILWTICO), gold prices, and the USD trade-weighted index.
-We chose USD/INR for its high liquidity, dual US/India news exposure, and managed float regime.
-\end{sloppypar}
+\subsection{Implemented Baselines}
 
-\subsection{Models}
+The repository contains the following implemented comparison families:
+\begin{itemize}[leftmargin=*]
+    \item classical time-series baselines: ARIMA, SARIMA, Holt--Winters, Theta;
+    \item volatility baselines: GARCH, GJR-GARCH, EGARCH;
+    \item ML baselines: OLS, Ridge, Random Forest, XGBoost, Gradient Boosting;
+    \item deep learning baselines: LSTM, GRU, Attention;
+    \item scenario baselines: GBM, jump diffusion, sentiment-augmented drift, regime switching;
+    \item LLM baselines and ablations: Gemini V3, Gemini V4, rule personas, memory-only, and later multi-provider LLM persona matrices;
+    \item topology/chaos ablations: macro baseline, topology-only, chaos-only, topology+chaos, TEPC full, persona-only, and TEPC persona blends.
+\end{itemize}
+
+No saved ARDL or DMI benchmark outputs were found in the repository snapshot. We therefore do not fabricate ARDL/DMI rows in the result tables. Where the user requested such comparisons, we interpret the scientific intent as comparing against the strongest available implemented econometric and technical baselines.
+
+% ============================================================
+% 6. RESULTS
+% ============================================================
+\section{Results}
+
+\subsection{Raw Aggregate News is Weak; Structured and Lagged News is Better}
+
+The first clear repository-wide lesson is negative: raw aggregate news statistics are not enough. Goldstein aggregated directly against IMF$_3$ is almost useless; naive political-news enhancement can even worsen regression models. Only after thematic filtering, lag analysis, and stateful feature engineering does signal become usable.
 
 \begin{table*}[t]
 \centering
 \small
-\caption{Models used in our experiments.}
-\label{tab:models}
-\resizebox{\textwidth}{!}{%
-\begin{tabular}{llll}
+\caption{Early-stage signal discovery across the repository.}
+\label{tab:signal_discovery}
+\begin{tabular}{p{4.2cm}p{3.0cm}p{8.0cm}}
 \toprule
-\textbf{Model} & \textbf{Type} & \textbf{Input} & \textbf{Output} \\
+\textbf{Artifact / Statistic} & \textbf{Value} & \textbf{Interpretation} \\
 \midrule
-XGBoost Classifier & Gradient Boosting & 80 lagged GDELT features & Danger/Safe \\
-Random Forest (3-class) & Ensemble & 80 lagged GDELT features & UP/DOWN/STABLE \\
-EGARCH(1,1) & Volatility Model & Returns & Conditional volatility \\
-EGARCH + XGBoost Hybrid & Hybrid & Volatility + GDELT + Macro & Returns \\
-Ridge Regression & Linear & 6 macro/sentiment features & Next-day rate \\
-GARCH(1,1) / GJR-GARCH & Volatility Models & Returns & Conditional volatility \\
-Monte Carlo (4 variants) & Simulation & Drift, volatility, sentiment & 30-day paths \\
-Gemini V4 System & LLM Multi-agent & News + macro context & Next-day rate \\
-MA Momentum & Moving Average & Price history & Trend prediction \\
-Ultimate Ensemble (15+) & Model combination & All model outputs & Weighted prediction \\
-\bottomrule
-\end{tabular}}
-\end{table*}
-
-\subsection{Evaluation Metrics}
-
-\begin{table*}[t]
-\centering
-\small
-\caption{Evaluation metrics used in our study.}
-\label{tab:metrics}
-\begin{tabular}{llll}
-\toprule
-\textbf{Metric} & \textbf{Description} & \textbf{Task} & \textbf{Higher = Better?} \\
-\midrule
-Precision & TP / (TP + FP) & Classification & Yes \\
-Recall & TP / (TP + FN) & Classification & Yes \\
-F1-Score & Harmonic mean of P \& R & Classification & Yes \\
-Directional Accuracy & \% correct direction & All & Yes \\
-RMSE & Root Mean Squared Error & Regression & No \\
-MAE & Mean Absolute Error & Regression & No \\
-$R^2$ & Coefficient of Determination & Regression & Yes \\
-Avg. Error (\%) & $|\hat{y} - y| / y \times 100$ & Point prediction & No \\
-AIC/BIC & Model selection criteria & Volatility & No \\
-VaR (95\%) & Value at Risk & Risk & Informational \\
+Goldstein vs.\ IMF$_3$ correlation & $0.009965$ & Raw bilateral Goldstein aggregation alone has negligible direct relationship with the decomposed noise target. \\
+US average tone vs.\ USD/INR correlation & $0.1639$ & Cross-country tone carries weak but nonzero information; it is not sufficient as a standalone predictor. \\
+Phase-B \texttt{Tone\_Economy} vs.\ IMF$_3$ & $-0.1466$ (p $= 0.0194$) & Theme-filtered economic tone becomes statistically meaningful once irrelevant articles are removed. \\
+Meaningful-pattern event count correlation with volatility & $-0.1294$ & Event density helps characterize abnormal movement regimes. \\
+Peak Goldstein lag & 9 days & The strongest Goldstein relationship appears with delay rather than contemporaneously. \\
+Peak tone lag & 12 days & Tone shifts also appear delayed, supporting lagged rather than same-day feature design. \\
+Political-news enhancement on RF/XGBoost & RMSE worsened by 1.18\% / 1.78\% & Naive injection of political features can degrade price regressors when decomposition and lag structure are absent. \\
 \bottomrule
 \end{tabular}
 \end{table*}
 
-\subsection{Baselines}
+\begin{figure*}[t]
+\centering
+\begin{subfigure}[t]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{lead_lag.png}
+    \caption{Lead-lag visualization used in the early research track.}
+\end{subfigure}
+\hfill
+\begin{subfigure}[t]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{meaningful_patterns.png}
+    \caption{Broader meaningful-pattern analysis across direction, volatility, and regimes.}
+\end{subfigure}
+\caption{The strongest signal in the early repository is delayed and regime-like, not a contemporaneous one-shot news-to-price mapping.}
+\label{fig:leadlag}
+\end{figure*}
 
-We compare against a comprehensive set of baselines spanning na\"ive, classical, machine learning, and deep learning approaches:
+This is precisely why the Indian FX market is poorly suited to simplistic direct application of many models. USD/INR does not reward a ``feed in raw sentiment, predict tomorrow's price'' workflow. It requires filtering, alignment, and delayed-state representation.
 
-\begin{sloppypar}
-\begin{enumerate}[leftmargin=*]
-    \item \textbf{Na\"ive baselines:} Random guessing (20\% precision for danger-day, 33\% for 3-class, 50\% for binary); na\"ive last-close ($\hat{y}_{t+1} = y_t$); and MA Momentum (moving average trend following).
-    
-    \item \textbf{Classical time series:} ARIMA, SARIMA, Holt-Winters exponential smoothing, and Theta method.
-    
-    \item \textbf{Volatility models:} Standard GARCH(1,1), GJR-GARCH (asymmetric), and EGARCH(1,1) without news features.
-    
-    \item \textbf{Machine learning:} XGBoost with technical indicators only (no sentiment: 20-day volatility, RSI, MACD, Bollinger bandwidth, momentum); Random Forest regression; and Ridge Regression with macro indicators only.
-    
-    \item \textbf{Deep learning:} LSTM (2 layers, 64 hidden units, 60-day lookback), GRU (2 layers, 64 hidden units), and multi-head Attention with positional encoding.
-    
-    \item \textbf{News sentiment baseline:} XGBoost with raw aggregated GDELT sentiment (no thematic filtering), to isolate the contribution of our thematic engineering.
-    
-    \item \textbf{LLM ablation:} Gemini~V3 (basic hybrid model without debiasing techniques) and statistical-only model (Ridge Regression without LLM component).
-\end{enumerate}
-\end{sloppypar}
+\subsection{Phase C: Danger-Day Classification Works Better Than Direct Price Regression}
 
-\begin{sloppypar}
-This baseline suite enables controlled comparisons: items 4 vs.\ our full model isolate the contribution of news sentiment; item 6 vs.\ our thematic features isolate the contribution of domain-specific filtering; and items 5 vs.\ our framework test whether structured LLM reasoning outperforms end-to-end deep learning on limited data.
-\end{sloppypar}
-
-\subsection{Implementation \& Reproducibility}
-
-\begin{sloppypar}
-All experiments were conducted on a Windows platform using Python~3.10+ with pandas, NumPy, scikit-learn, XGBoost, statsmodels (\texttt{arch} package for GARCH), and TensorFlow/Keras (for LSTM, GRU, and Attention models).
-We also use the Google Gemini API (\texttt{gemini-2.5-flash}).
-Train/test splits are strictly chronological (80\%/20\%) to prevent look-ahead bias; no future data leaks into training at any stage.
-XGBoost training completes in ${<}5$~minutes; LSTM/GRU training uses early stopping (patience=10) with 20\% validation split from training data.
-Monte Carlo simulations run 10,000 paths.
-The Gemini~V4 system includes a 20-day warmup period.
-All deep learning models use the same input features and lookback windows for fair comparison.
-\end{sloppypar}
-
-% ============================================================
-% 5. RESULTS & DISCUSSION
-% ============================================================
-\section{Results \& Discussion}
-
-\subsection{Phase A--B: Signal Decomposition \& Feature Correlations}
-
-VMD successfully separates the USD/INR exchange rate into three distinct modes. The high-frequency noise component ($\text{IMF}_3$, mean: 0.000081, std: 0.0626) captures daily volatility driven by news events. Correlation analysis between the 16 engineered features and $\text{IMF}_3$ reveals that theme-specific features substantially outperform raw aggregated sentiment:
+The saved Phase-C artifacts support the repository's shift toward classification. Danger days are rare, so precision matters more than aggregate accuracy. At the F1-optimized threshold of 0.38, the classifier achieves a substantial improvement over a random 20\% precision baseline.
 
 \begin{table}[t]
 \centering
 \small
-\caption{Top Feature Correlations with Exchange Rate Noise Component ($\text{IMF}_3$).}
-\label{tab:correlations}
-\begin{tabular}{lll}
+\caption{Phase-C danger-day classification results on the saved test split (73 days).}
+\label{tab:danger}
+\begin{tabular}{lr}
 \toprule
-\textbf{Feature} & \textbf{Correlation} & \textbf{Interpretation} \\
+\textbf{Statistic} & \textbf{Value} \\
 \midrule
-$\text{Tone}_\text{Economy}$ & $-0.23$ & Negative economic sentiment $\rightarrow$ Higher volatility \\
-$\text{Goldstein}_\text{Weighted}$ & $-0.19$ & Conflict events $\rightarrow$ Market instability \\
-$\text{Volume\_Spike}_\text{Economy}$ & $+0.15$ & Economic news spikes $\rightarrow$ Volatility \\
-$\text{Count}_\text{Corporate}$ & $+0.12$ & Corporate news volume $\rightarrow$ Market activity \\
-$\text{Tone}_\text{Overall}$ (aggregated) & $+0.08$ & Weak; washed out by noise \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-The 3$\times$ improvement in correlation from aggregated (0.08) to theme-specific filtering (0.23) validates our thematic engineering approach. In financial markets, correlations of 0.15--0.25 are considered meaningful, as higher values would be arbitraged away.
-
-\subsection{Phase C: Danger-Day Classification}
-
-\textbf{Objective:} Can we identify high-volatility ``danger days'' before they occur?
-
-\begin{table}[t]
-\centering
-\small
-\caption{Danger-Day Classification Results (Test Set, 73 days).}
-\label{tab:classification}
-\begin{tabular}{ll}
-\toprule
-\textbf{Metric} & \textbf{Value} \\
+True positives & 12 \\
+False positives & 18 \\
+True negatives & 32 \\
+False negatives & 11 \\
 \midrule
-True Positives & 12 danger days correctly identified \\
-False Positives & 18 false alarms \\
-True Negatives & 32 safe days correct \\
-False Negatives & 11 missed danger days \\
-\midrule
-Precision & 40\% (vs.\ 20\% random baseline: \textbf{+100\% improvement}) \\
+Precision & 40\% \\
 Recall & 52\% \\
-F1-Score & 0.45 \\
+F1-score & 0.45 \\
 Accuracy & 60\% \\
-Optimal Threshold & 0.38 \\
+Optimal threshold & 0.38 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Feature importance analysis reveals that lagged features are most predictive: $\text{Tone}_\text{Economy}$ (lag 3), $\text{Goldstein}_\text{Weighted}$ (lag 4), and $\text{Volume\_Spike}$ (lag 1). This indicates a 1--4 day delay in market absorption of news signals.
+The broader meaningful-pattern analysis also reports 41.2\% accuracy on UP/DOWN/STABLE directional classification, again above the naive baseline. The core result is not that the model predicts exact prices particularly well; it does not. The result is that state-dependent volatility and directional stress are tractable.
 
-\subsubsection{Directional Prediction}
+\begin{figure*}[t]
+\centering
+\begin{subfigure}[t]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{phase_c_classifier.png}
+    \caption{Classifier performance panel.}
+\end{subfigure}
+\hfill
+\begin{subfigure}[t]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{phase_c_confusion.png}
+    \caption{Balanced confusion matrix at the tuned threshold.}
+\end{subfigure}
+\caption{Phase-C classification results. The practical value lies in risk flagging rather than exact valuation.}
+\label{fig:phasec}
+\end{figure*}
 
-The 3-class directional classifier achieves 41.2\% accuracy (vs.\ 33\% random baseline, a 25\% improvement), with $\text{GoldsteinScale}_\text{mean}$ as the most important feature. Days with extreme negative sentiment show an average exchange rate change of $-0.0116$ INR, while extreme positive sentiment days show $+0.0123$ INR.
+\subsection{EGARCH Remains Useful, but the Large Ensemble Exposes Many Model Failures}
 
-\subsection{Lead-Lag Analysis}
-
-Cross-correlation analysis reveals a critical finding: political sentiment \textit{leads} exchange rate movements.
+Table~\ref{tab:garch_family} shows that EGARCH is the strongest of the repository's GARCH-family fits under the saved AIC/BIC comparison.
 
 \begin{table}[t]
 \centering
 \small
-\caption{Lead-Lag Correlation Analysis.}
-\label{tab:leadlag}
-\begin{tabular}{lll}
-\toprule
-\textbf{Signal} & \textbf{Peak Lag (days)} & \textbf{Interpretation} \\
-\midrule
-Goldstein Scale & 9 days & Political conflict peaks predict volatility 9 days later \\
-Average Tone & 12 days & Sentiment shifts predict movements 12 days later \\
-Volume Spike & 1 day & News volume spikes have near-immediate impact \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-This 9--12 day lead time suggests a semi-strong form Efficient Market Hypothesis violation: publicly available news information is not fully priced in for over a week.
-
-\subsection{GARCH/EGARCH Volatility Results}
-
-\begin{table}[t]
-\centering
-\small
-\caption{GARCH Family Model Comparison.}
-\label{tab:garch}
+\caption{GARCH-family comparison from \texttt{GARCH/output/garch\_comparison.csv}.}
+\label{tab:garch_family}
 \begin{tabular}{lcccc}
 \toprule
-\textbf{Model} & \textbf{Log-Lik.} & \textbf{AIC} & \textbf{BIC} & \textbf{Asymmetry ($\gamma$)} \\
+\textbf{Model} & \textbf{Log-Lik.} & \textbf{AIC} & \textbf{BIC} & \textbf{Asymmetry} \\
 \midrule
-\textbf{EGARCH} & $-23.17$ & \textbf{60.33} & \textbf{85.04} & 0.202 \\
-GARCH(1,1) & $-24.22$ & 60.45 & 81.63 & 0.0 \\
-GJR-GARCH & $-23.68$ & 61.36 & 86.06 & $-0.252$ \\
+EGARCH & $-23.166$ & \textbf{60.331} & \textbf{85.037} & 0.2017 \\
+GARCH & $-24.225$ & 60.450 & 81.626 & 0.0000 \\
+GJR-GARCH & $-23.678$ & 61.356 & 86.062 & $-0.2519$ \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-EGARCH achieves the best fit (lowest AIC) and confirms a significant leverage effect ($\gamma = 0.202$): negative shocks amplify USD/INR volatility more than positive shocks. The hybrid EGARCH + XGBoost model identifies realized volatility (20-day) as the top predictor (27.5\% importance), followed by India Goldstein scores (15.8\%).
+The hybrid branch's top XGBoost feature importances are also informative: \texttt{Realized\_Vol\_20d} dominates at 27.5\%, followed by \texttt{India\_Avg\_Goldstein} at 15.8\%, \texttt{DTWEXBGS} at 9.6\%, and \texttt{Goldstein\_Avg} at 8.2\%. This is economically plausible. Volatility structure still matters most, but bilateral event pressure and dollar conditions are meaningful secondary drivers.
 
-\subsection{Regression Model Results}
+\begin{figure*}[t]
+\centering
+\begin{subfigure}[t]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{garch_volatility.png}
+    \caption{EGARCH conditional volatility dynamics.}
+\end{subfigure}
+\hfill
+\begin{subfigure}[t]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{garch_feature_importance.png}
+    \caption{Hybrid EGARCH + XGBoost feature importance.}
+\end{subfigure}
+\caption{The GARCH branch remains valuable as a volatility and feature-prior engine, even when direct point forecasting remains difficult.}
+\label{fig:garch}
+\end{figure*}
 
-\textbf{Objective:} Can traditional ML models predict exact exchange rate values?
+The ensemble branch reinforces the same lesson even more strongly: many sophisticated models do not survive the task. Table~\ref{tab:ultimate_models} reports selected models from the saved ultimate ensemble comparison.
 
-\begin{table}[t]
+\begin{table*}[t]
 \centering
 \small
-\caption{Regression Model Results: Exact Price Prediction.}
-\label{tab:regression}
-\begin{tabular}{lccc}
-\toprule
-\textbf{Model} & \textbf{$R^2$ (Train)} & \textbf{$R^2$ (Test)} & \textbf{RMSE (Test)} \\
-\midrule
-OLS & 0.902 & N/A & N/A \\
-Random Forest & 0.997 & $-0.533$ & 0.941 \\
-XGBoost & 1.000 & $-0.845$ & 1.032 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-The negative test $R^2$ values demonstrate severe overfitting: models memorize training data (perfect $R^2$) but fail to generalize. This result is consistent with the efficient market hypothesis and validates our focus on classification over regression.
-
-\subsection{Gemini V4 Multi-Persona Results}
-
-\textbf{Objective:} Can a debiased LLM multi-agent system provide accurate short-term predictions?
-
-\begin{table}[t]
-\centering
-\small
-\caption{Gemini V4 vs.\ V3 Performance Comparison (2023 Full Year, 262 Trading Days).}
-\label{tab:gemini}
-\begin{tabular}{lcc}
-\toprule
-\textbf{Metric} & \textbf{Gemini V3} & \textbf{Gemini V4 (Debiased)} \\
-\midrule
-Avg.\ Prediction Error & $\sim$0.35\% & $\sim$\textbf{0.30\%} \\
-Direction Accuracy & 52--55\% & \textbf{54--58\%} \\
-$R^2$ (Statistical Model) & N/A & 0.76--0.82 \\
-Stat Weight Range & Fixed 80\% & Adaptive 67--85\% \\
-LLM Weight Range & Fixed 20\% & Adaptive 15--33\% \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\begin{table}[t]
-\centering
-\small
-\caption{Gemini V4 January 2026 Live Predictions (Selected Days).}
-\label{tab:jan2026}
-\begin{tabular}{lcccc}
-\toprule
-\textbf{Date} & \textbf{Prediction} & \textbf{Actual} & \textbf{Error \%} & \textbf{Consensus} \\
-\midrule
-2026-01-02 & 89.998 & 89.962 & +0.040\% & Warmup \\
-2026-01-16 & 90.441 & 90.362 & +0.087\% & 80\% Higher \\
-2026-01-29 & 92.006 & 92.041 & $-0.037$\% & 93\% Higher \\
-2026-01-30 & 91.828 & 91.782 & +0.051\% & 94\% Higher \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-The V4 system successfully captured the INR depreciation trend from $\sim$90 to $\sim$92 INR during January 2026, with average error $<$0.5\%. Debiasing (symmetric prompts, randomized labels, entropy weighting) improved both accuracy and directional performance over V3.
-
-\subsection{Ultimate Ensemble Comparison}
-
-\textbf{Objective:} Which model or combination performs best overall?
-
-\begin{table}[t]
-\centering
-\small
-\caption{Comprehensive Model Comparison (sorted by RMSE).}
-\label{tab:ensemble}
+\caption{Selected models from \texttt{ensemble\_model/output/ultimate\_model\_metrics.csv}.}
+\label{tab:ultimate_models}
+\resizebox{\textwidth}{!}{%
 \begin{tabular}{lccc}
 \toprule
 \textbf{Model} & \textbf{RMSE} & \textbf{MAE} & \textbf{$R^2$} \\
 \midrule
-Basic Ensemble (GARCH+VMD) & 0.479 & 0.419 & 0.599 \\
-\textbf{MA Momentum} & \textbf{0.495} & \textbf{0.398} & \textbf{0.571} \\
-Refined Ensemble & 0.547 & 0.432 & 0.477 \\
-GARCH Hybrid & 0.594 & 0.459 & 0.383 \\
-Monte Carlo & 0.623 & 0.477 & 0.320 \\
-Theta & 0.669 & 0.498 & 0.218 \\
-GDELT Ridge & 0.723 & 0.627 & 0.085 \\
-VMD Trend & 1.004 & 0.825 & $-0.763$ \\
-Holt-Winters & 1.086 & 0.842 & $-1.066$ \\
-ARIMA & 1.150 & 0.895 & $-1.317$ \\
-SARIMA & 1.157 & 0.902 & $-1.345$ \\
-GRU & 1.158 & 0.903 & $-1.347$ \\
-LSTM & 1.191 & 0.928 & $-1.484$ \\
-Attention & 2.672 & 2.508 & $-11.493$ \\
+MA\_Momentum & \textbf{0.4950} & \textbf{0.3980} & \textbf{0.5711} \\
+Mini\_Ensemble & 0.5673 & 0.4442 & 0.4366 \\
+GARCH & 0.5939 & 0.4594 & 0.3826 \\
+Monte\_Carlo & 0.6473 & 0.4898 & 0.2666 \\
+Theta & 0.6685 & 0.4980 & 0.2178 \\
+GDELT\_Ridge & 0.7229 & 0.6270 & 0.0853 \\
+VMD\_Trend & 1.0036 & 0.8247 & $-0.7630$ \\
+ARIMA & 1.1505 & 0.8949 & $-1.3168$ \\
+SARIMA & 1.1574 & 0.9022 & $-1.3448$ \\
+GRU & 1.1580 & 0.9029 & $-1.3472$ \\
+LSTM & 1.1914 & 0.9282 & $-1.4844$ \\
+Attention & 2.6716 & 2.5081 & $-11.4933$ \\
+Gemini\_Adjusted & 6.5674 & 6.5435 & $-74.4936$ \\
 \bottomrule
-\end{tabular}
-\end{table}
+\end{tabular}}
+\end{table*}
 
-A striking finding: the optimized ultimate ensemble converges to 95.5\% MA Momentum + 4.5\% GDELT Ridge with near-zero weight for all deep learning and complex models. LSTM, GRU, and Attention models all produce negative $R^2$, performing worse than predicting the mean.
+The optimized ensemble weights collapse to a highly interpretable solution: 95.45\% \texttt{MA\_Momentum} and 4.55\% \texttt{GDELT\_Ridge}, with effectively zero weight on the rest. This is the clearest repository-level evidence that the Indian FX market is not hospitable to many off-the-shelf direct point-prediction models. Even SARIMA, the specific baseline requested by the user, is decisively outperformed here.
 
-\subsection{Monte Carlo Forecasting Results}
+\subsection{Monte Carlo is Best Used as a Distributional Risk Engine}
+
+The Monte Carlo branch is most valuable when treated as a scenario system. Table~\ref{tab:montecarlo} summarizes the 30-day saved forecast distribution statistics.
 
 \begin{table}[t]
 \centering
 \small
-\caption{30-Day Monte Carlo Forecast Comparison (from 89.90 INR base).}
+\caption{Thirty-day Monte Carlo forecast statistics from \texttt{monte\_carlo\_statistics.csv}.}
 \label{tab:montecarlo}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Model} & \textbf{Median} & \textbf{Std} & \textbf{5th Pctl.} & \textbf{95th Pctl.} \\
+\midrule
+Standard GBM & 90.446 & 1.390 & 88.172 & 92.740 \\
+Regime-Switching & \textbf{90.370} & \textbf{1.336} & 88.232 & 92.618 \\
+Jump Diffusion & 87.260 & 3.940 & 80.714 & 93.610 \\
+Sentiment-Augmented & 91.235 & 1.398 & 88.950 & 93.528 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The regime-switching specification is the most balanced saved variant: it preserves uncertainty, avoids the excessive dispersion of jump diffusion, and produces a plausible central trajectory for risk management.
+
+\begin{figure*}[t]
+\centering
+\begin{subfigure}[t]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{ensemble_model_comparison.png}
+    \caption{Intermediate ensemble comparison output.}
+\end{subfigure}
+\hfill
+\begin{subfigure}[t]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{monte_carlo_weekly.png}
+    \caption{Weekly rolling Monte Carlo forecast summary.}
+\end{subfigure}
+\caption{The quantitative middle branch of the repository ultimately favors simple trend-following plus explicit uncertainty modeling over high-capacity direct forecasters.}
+\label{fig:ensemble_mc}
+\end{figure*}
+
+\subsection{Gemini V4 Improves Over V3, but Only as a Constrained Overlay}
+
+The repository's LLM results are strongest when the LLM is treated as a bounded adjustment layer rather than a stand-alone forecaster. Using the saved per-day summary files, Table~\ref{tab:gemini_results} compares V3 and V4 under a sign-of-change directional evaluation.
+
+\begin{table}[t]
+\centering
+\small
+\caption{Gemini V3/V4 comparison from saved daily summary files.}
+\label{tab:gemini_results}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{System} & \textbf{Days} & \textbf{Mean Abs.\ Error (\%)} & \textbf{Direction Acc.} & \textbf{Stat / LLM Weights} \\
+\midrule
+V3 hybrid days & 240 & 0.2741 & 61.25\% & 65--85 / 15--35 \\
+V4 hybrid days & 240 & \textbf{0.2695} & \textbf{64.17\%} & 55--85 / 15--45 \\
+V4 Jan 2026 live & 21 total & 0.3216 & 57.14\% & 62--85 / 15--38 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Project presentations summarize V4 directional performance more conservatively (roughly 54--58\%) under a different scoring convention. The branch summary files nevertheless confirm the same qualitative result: V4 improves on V3, and the improvement is attributable to better prompt design and better adaptive weighting rather than to more aggressive LLM control.
+
+\begin{table}[t]
+\centering
+\small
+\caption{Selected January 2026 V4 live predictions.}
+\label{tab:gemini_jan}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Date} & \textbf{Prediction} & \textbf{Actual} & \textbf{Error (\%)} & \textbf{Consensus} \\
+\midrule
+2026-01-02 & 89.9981 & 89.9619 & +0.0402 & Warmup \\
+2026-01-16 & 90.4564 & 90.3616 & +0.1049 & 100\% higher \\
+2026-01-29 & 92.0165 & 92.0408 & $-0.0265$ & 100\% higher \\
+2026-01-30 & 91.8205 & 91.7819 & +0.0421 & 83.5\% higher \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure*}[t]
+\centering
+\begin{subfigure}[t]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{gemini_v4_comparison.png}
+    \caption{Historical V4 comparison plot.}
+\end{subfigure}
+\hfill
+\begin{subfigure}[t]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{gemini_v4_jan_dashboard.png}
+    \caption{January 2026 dashboard.}
+\end{subfigure}
+\caption{Gemini V4 adds value only when it is constrained by statistical anchors, explicit confidence logic, and persona diversification.}
+\label{fig:gemini_results_fig}
+\end{figure*}
+
+\subsection{\texttt{final phase}: Market Memory Beats Heavier Blends in the 100-Day Backtest}
+
+The most current hybrid branch produces one of the paper's most surprising results. On the 100-day walk-forward backtest, the best model is not the full feature stack, nor the rule personas, nor the standalone Gemini run. It is the \texttt{memory\_only\_no\_personas} ablation.
+
+\begin{table}[t]
+\centering
+\small
+\caption{\texttt{final phase} 100-day backtest ablations.}
+\label{tab:finalphase_100}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Experiment} & \textbf{MAE Price} & \textbf{RMSE Price} & \textbf{MAE Return} & \textbf{Dir.\ Acc.} \\
+\midrule
+memory\_only\_no\_personas & \textbf{0.2421} & \textbf{0.3290} & \textbf{0.002718} & \textbf{0.61} \\
+stat\_ml\_no\_gdelt & 0.2473 & 0.3359 & 0.002779 & 0.49 \\
+rule\_personas & 0.2901 & 0.4182 & 0.003260 & 0.58 \\
+stat\_ml\_full & 0.3005 & 0.4361 & 0.003377 & 0.58 \\
+stat\_ml\_no\_macro & 0.3524 & 0.5507 & 0.003955 & 0.58 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+This result suggests that, once immediate-price anchoring is removed, a compact shared-state representation can outperform a larger kitchen-sink feature stack. It also implies that the repository's late-stage progress is not primarily about adding more raw inputs, but about learning the right latent market summary.
+
+The 30-day LLM matrix further sharpens this result:
+
+\begin{table*}[t]
+\centering
+\small
+\caption{\texttt{final phase} 30-day LLM matrix and ablation comparison.}
+\label{tab:finalphase_30}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Experiment} & \textbf{MAE Price} & \textbf{RMSE Price} & \textbf{MAE Return} & \textbf{Dir.\ Acc.} \\
+\midrule
+stat\_ml\_no\_gdelt & \textbf{0.3188} & \textbf{0.3966} & \textbf{0.003540} & 0.5000 \\
+memory\_only\_no\_personas & 0.3295 & 0.3966 & 0.003658 & \textbf{0.5667} \\
+Gemini 2.5 Flash personas & 0.4433 & 0.5696 & 0.004936 & 0.5333 \\
+Claude Sonnet 4 personas & 0.4439 & 0.5698 & 0.004942 & 0.5333 \\
+GPT-5 Chat personas & 0.4508 & 0.5816 & 0.005019 & 0.5333 \\
+rule\_personas & 0.4907 & 0.6355 & 0.005463 & 0.5333 \\
+stat\_ml\_full & 0.5060 & 0.6578 & 0.005634 & 0.5333 \\
+stat\_ml\_no\_macro & 0.6419 & 0.8914 & 0.007142 & 0.5000 \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+Here the model selection lesson is even sharper: for this short 30-day window, news-free or memory-heavy baselines beat the richer persona stacks on price MAE. The standalone 100-day Gemini 2.5 Flash backtest (\texttt{llm\_gemini\_100d}) still performs reasonably well at MAE price 0.2726 and directional accuracy 58\%, but it does not beat the memory-only baseline.
+
+\begin{figure*}[t]
+\centering
+\begin{subfigure}[t]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{final_phase_leaderboard.png}
+    \caption{Cross-run leaderboard.}
+\end{subfigure}
+\hfill
+\begin{subfigure}[t]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{final_phase_pareto.png}
+    \caption{MAE-versus-directional-accuracy Pareto view.}
+\end{subfigure}
+\caption{\texttt{final phase} comparison plots. The best late-stage models are not the most complex ones; compressed memory and selective feature exclusion are often stronger.}
+\label{fig:finalphase}
+\end{figure*}
+
+\subsection{TEPC: Chaos and Topology Become Useful Once Timing is Made Strict}
+
+The TEPC branch is where the repository most directly answers the ``new generation'' framing in the user's request. It is not merely a larger feature table. It is a different forecasting ontology: USD/INR as one node in a synchronized macro system.
+
+Under the strict raw-GDELT 80-day run with a two-day response lag, the full TEPC stack is the best experiment by the branch's macro-F1-first ranking rule:
+
+\begin{table*}[t]
+\centering
+\small
+\caption{TEPC strict raw-GDELT 80-day ablation results.}
+\label{tab:tepc_strict}
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Experiment} & \textbf{Breakout Acc.} & \textbf{Macro-F1} & \textbf{MAE Return} & \textbf{RMSE Return} & \textbf{MAE Volatility} \\
+\midrule
+tepc\_full & 0.7750 & \textbf{0.3370} & \textbf{0.002746} & 0.003765 & 0.000791 \\
+topology\_chaos & 0.6875 & 0.3030 & 0.002991 & 0.004136 & 0.000732 \\
+macro\_baseline & 0.7625 & 0.2884 & 0.002782 & \textbf{0.003755} & 0.000974 \\
+chaos\_only & 0.7375 & 0.2830 & 0.003080 & 0.004088 & 0.000873 \\
+topology\_only & 0.6875 & 0.2757 & 0.003352 & 0.004422 & \textbf{0.000730} \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+This table is revealing. Topology-only and chaos-only are individually useful but incomplete; their combination improves macro-F1 over either alone; and the full stack remains strongest overall. In other words, the branch supports the claim that topological and chaotic summaries are not gimmicks once the task is timed honestly.
+
+The persona overlay produces a second nuance:
+
+\begin{table}[t]
+\centering
+\small
+\caption{TEPC strict persona-v3 overlay comparison (80-day run).}
+\label{tab:tepc_persona}
 \begin{tabular}{lccc}
 \toprule
-\textbf{Model} & \textbf{Median (30-day)} & \textbf{Std Dev} & \textbf{P(Increase)} \\
+\textbf{Experiment} & \textbf{Breakout Acc.} & \textbf{Macro-F1} & \textbf{MAE Return} \\
 \midrule
-Standard GBM & 90.45 & 1.39 & N/A \\
-\textbf{Regime-Switching} & \textbf{90.37} & \textbf{1.34} & \textbf{63.9\%} \\
-Jump Diffusion & 87.26 & 3.94 & N/A \\
-Sentiment-Augmented & 91.23 & 1.40 & N/A \\
+tepc\_full & 0.7750 & \textbf{0.3370} & 0.002746 \\
+persona\_rule\_only & \textbf{0.8000} & 0.2963 & 0.002886 \\
+tepc\_persona\_blend & 0.7875 & 0.2937 & \textbf{0.002695} \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The regime-switching model provides the most balanced forecasts: not overly pessimistic (Jump Diffusion) or optimistic (Sentiment-Augmented), with the lowest standard deviation among non-trivial models. The 95\% VaR is $-1.85$\%.
+The rule-persona-only system attains the highest raw breakout accuracy, but the README and run notes explain why: it acts as an abstaining range predictor in a range-heavy regime. The blended TEPC persona system, by contrast, produces the best return MAE. The branch therefore separates classifier quality, regime abstention behavior, and continuous return quality rather than collapsing them into one metric.
 
-\subsection{Discussion}
+The livepull 100-day run adds one more important result: chaos features are the strongest classifier in that extended setup. Specifically, \texttt{chaos\_only} reaches 80\% breakout accuracy and macro-F1 0.404, while \texttt{tepc\_full} remains competitive and delivers the best return MAE at 0.003430. This is a strong indication that the chaos layer is not decorative; it becomes especially useful once richer cross-asset node feeds are available.
 
-\paragraph{Synthesis.} Our results tell a coherent story: exact exchange rate prediction is intractable (negative $R^2$ for regression models), but volatility classification and LLM-guided short-term prediction provide meaningful value. The danger-day classifier doubles random baseline precision, and the Gemini V4 system achieves sub-0.5\% errors. The discovery of 9--12 day lead times between political sentiment and exchange rate movements represents a potential semi-strong EMH violation.
+\begin{figure*}[t]
+\centering
+\begin{subfigure}[t]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{tepc_strict_metric_bars.png}
+    \caption{Strict raw-GDELT TEPC metric panel.}
+\end{subfigure}
+\hfill
+\begin{subfigure}[t]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{tepc_strict_predictions.png}
+    \caption{Prediction overlays for the best strict TEPC experiments.}
+\end{subfigure}
+\caption{TEPC's strict backtest results. The topology/chaos branch becomes useful once the task explicitly prevents lag-copying and makes regime dynamics first-class.}
+\label{fig:tepc}
+\end{figure*}
 
-\paragraph{Simpler models dominate.} The most surprising finding is that MA Momentum ($R^2 = 0.571$) outperforms all deep learning models (LSTM: $R^2 = -1.484$, GRU: $R^2 = -1.347$). This is consistent with the limited sample size (362 days) being insufficient for deep learning, and with exchange rates being predominantly driven by mean-reverting momentum dynamics.
+\subsection{Cross-Branch Synthesis}
 
-\paragraph{Comparison to prior work.} Our thematic sentiment correlations (0.15--0.23) are comparable to those reported by \citet{wu2020sentiment} for other currency pairs. The Gemini V4 system's 54--58\% directional accuracy modestly exceeds the 52--55\% typically achieved by sentiment-based models \citep{nassirtoussi2014}, with the debiasing techniques contributing a 2--3\% improvement over the non-debiased V3.
+Taken together, the repository's results support five broad conclusions.
 
-\paragraph{LLM ablation study.} To validate that the LLM component contributes non-redundant information, we compare three configurations: (a) statistical model only (Ridge Regression, $w_\text{llm} = 0$), (b) Gemini V3 without debiasing, and (c) full Gemini V4 with debiasing. Removing the LLM component entirely degrades directional accuracy from 56\% to 53\%, while the adaptive weight $w_\text{llm}$ stabilizes at 15--33\% rather than converging to zero. This provides empirical evidence against the null hypothesis that persona outputs are pure noise (see Section~\ref{sec:theoretical}).
+\paragraph{1. USD/INR is hostile to naive direct price prediction.}
+Negative $R^2$ across ARIMA, SARIMA, LSTM, GRU, Attention, several news-augmented regressors, and the older Gemini-adjusted ensemble demonstrate that more complexity is not enough. This is exactly the sense in which the Indian FX market is ``not suitable'' for many standard models: without strong structural constraints, they mostly learn noise, persistence, or evaluation artifacts.
 
-\paragraph{Practical relevance.} The framework has direct applications in: (1) currency trader risk management, where reducing position size on danger-day predictions could reduce drawdowns by 25--30\%; (2) corporate treasury hedging, i.e.\ timing hedge execution based on volatility forecasts; (3) central bank monitoring, providing early warning for capital flight and sentiment deterioration; and (4) a recommended time-horizon-specific model selection strategy (Table~\ref{tab:recommended}).
+\paragraph{2. News is useful only after structure is imposed.}
+Raw aggregate Goldstein signal is near zero against IMF$_3$, and naive political-news augmentation worsens regressors. News becomes useful after theme filtering, lag selection, event-intensity weighting, or memory/topology embedding.
 
-\begin{table}[t]
+\paragraph{3. Classification and state estimation beat raw regression.}
+Phase C danger-day classification, \texttt{final phase} memory compression, and TEPC breakout forecasting are all more robust than exact one-step direct price regression.
+
+\paragraph{4. LLMs help most as bounded overlays.}
+Gemini V4 improves over V3, but the strongest later results come when LLMs or personas consume structured memory and are prevented from dominating the final forecast.
+
+\paragraph{5. Topology and chaos become meaningful once timing is strict.}
+TEPC's strongest results appear specifically in the strict, lagged, raw-GDELT runs where trivial lag-copying is removed. This is exactly the setting in which a network/chaos representation should matter.
+
+\begin{table*}[t]
 \centering
 \small
-\caption{Recommended Model by Forecasting Horizon.}
-\label{tab:recommended}
-\begin{tabular}{lll}
+\caption{Recommended model family by forecasting objective and horizon.}
+\label{tab:recommendations}
+\begin{tabular}{p{3.5cm}p{4.8cm}p{6.3cm}}
 \toprule
-\textbf{Time Horizon} & \textbf{Recommended Model} & \textbf{Expected Error} \\
+\textbf{Objective / Horizon} & \textbf{Recommended Branch} & \textbf{Why} \\
 \midrule
-1--3 Days & Gemini Daily Predictor & 0.04--0.25\% \\
-1 Week & Gemini V4 Hybrid & 0.3--0.5\% \\
-2--4 Weeks & Ultimate Ensemble (MA) & 0.5--0.8\% \\
-1+ Month & Monte Carlo + GARCH & Wide confidence bands \\
+Danger-day / abnormal volatility flagging & Phase C XGBoost classifier & Best early branch for actionable risk alerts; precision and recall are more relevant than exact price fit. \\
+Short-horizon narrative-aware next-day forecasting & Gemini V4 hybrid & Useful when a human wants a news-conditioned, persona-diversified view rather than a pure statistical forecast. \\
+Walk-forward short-horizon forecasting under honest information embargo & \texttt{final phase} memory-only or no-GDELT ablations & Strongest late-stage MAE and directional results in the 100-day and 30-day backtests. \\
+Breakout classification in a coupled macro regime & TEPC chaos-heavy variants and \texttt{tepc\_full} & Best repository branch for network-state and breakout interpretation under strict lagged timing. \\
+Scenario analysis over weeks & Regime-switching Monte Carlo & Best when uncertainty bands and tail scenarios matter more than single-point prediction. \\
+Simple practical baseline & MA\_Momentum + small GDELT ridge weight & Strongest quantitative baseline in the ultimate ensemble branch and a useful reality check against over-modeling. \\
 \bottomrule
 \end{tabular}
-\end{table}
+\end{table*}
 
 % ============================================================
-% 6. CONCLUSION
+% 7. DISCUSSION
 % ============================================================
-\section{Conclusion}
+\section{Discussion}
 
-We presented a multi-phase framework for USD/INR exchange rate volatility prediction that integrates VMD signal decomposition, thematic GDELT sentiment engineering from 2.5 million news articles, XGBoost classification, EGARCH volatility modeling, Monte Carlo simulation, and a novel debiased multi-persona Gemini AI system. Our danger-day classifier achieves 40\% precision (2$\times$ random baseline) with 52\% recall, the Gemini V4 system achieves $\sim$0.3\% average error with 54--58\% directional accuracy, and our thematic feature engineering improves sentiment correlation from 0.08 (raw) to 0.23 (theme-specific).
+The repository can be read as a progressive attempt to answer a single question: \textit{what representation of the Indian FX market is stable enough to forecast?} The early answer was ``not raw price, but decomposed noise and danger-day risk.'' The middle answer was ``not a single econometric or neural architecture, but a small combination of robust quantitative priors.'' The later answer was ``not raw tabular features alone, but compact shared market state.'' TEPC adds a final answer: ``sometimes the right object is not a scalar series at all, but a synchronized macro network.''
 
-This work establishes three key findings for the field: (1) news sentiment predicts exchange rate \textit{volatility}, not exact prices, and classification approaches substantially outperform regression; (2) theme-specific filtering is critical for extracting meaningful signals from large-scale news data; and (3) debiased multi-persona LLM systems can provide competitive short-term forex predictions when combined with statistical models through adaptive weighting. The discovery of 9--12 day lead times between political sentiment and exchange rate movements suggests semi-strong form market inefficiency exploitable for practical risk management.
+This progression also explains why some results appear paradoxical if read superficially. It may seem strange that memory-only outperforms a richer late-stage full model, or that chaos-only is the best TEPC classifier in one setting while TEPC full is best on macro-F1 in another. But those results are coherent once USD/INR is treated as a regime-sensitive, intervention-prone market. In such a market, extra inputs help only if they are compressed correctly; otherwise they increase variance more than signal.
 
-Future work includes: deploying a real-time GDELT streaming pipeline for live trading, expanding to multiple currency pairs (EUR/USD, USD/CNY), applying fine-tuned financial NLP models (e.g., FinBERT) for deeper sentiment extraction beyond GDELT's pre-computed scores, conducting formal Granger causality tests to establish causal (not merely correlational) relationships, and validating findings with multi-year data to address the current 362-day sample limitation.
+The same logic resolves the role of LLMs. The repository does not support the claim that LLMs should replace classical forecasting engines. It supports a narrower, more defensible claim: multi-persona LLM systems can contribute useful incremental information when they are debiased, bounded, calibrated, and supplied with structured state rather than raw price anchors.
 
 % ============================================================
-% 7. LIMITATIONS
+% 8. LIMITATIONS
 % ============================================================
 \section{Limitations}
 
 \begin{itemize}[leftmargin=*]
-    \item \textbf{Dataset limitations:} The 362-day analysis period (January--December 2025) is relatively short for robust machine learning. Seasonal patterns may not be fully captured, and results may not generalize to different market regimes (e.g., crisis periods, structural breaks). GDELT's pre-computed sentiment scores may lack the nuance of domain-specific NLP models.
-    
-    \item \textbf{Methodological limitations:} Our thematic filtering relies on keyword-based matching, which may miss relevant articles or include irrelevant ones. The 20\% danger-day threshold is heuristic. Correlation analysis does not establish causation; sentiment shifts may reflect underlying economic factors rather than independently causing exchange rate movements.
-    
-    \item \textbf{Model limitations:} Deep learning models (LSTM, GRU) may perform differently with larger datasets ($>$5 years). The Gemini V4 system depends on a proprietary API with potential reproducibility concerns. Regression models showing negative $R^2$ confirm the fundamental difficulty of exact prediction but may improve with different feature engineering.
-    
-    \item \textbf{Computational limitations:} Gemini API rate limits constrain the number of persona queries per day. GARCH models were fit on a single currency pair; multi-currency extensions require additional compute.
-    
-    \item \textbf{Generalizability:} Results are specific to USD/INR (a managed float regime with RBI intervention) and may not transfer to free-floating currencies. The 2025 analysis period had relatively stable macro conditions; performance during crises is unknown. Transaction costs, bid-ask spreads, and market impact are not modeled.
+    \item \textbf{Heterogeneous benchmarks.} The repository contains multiple branches with different date ranges, objectives, and metrics. This paper treats them as a research program, not a single apples-to-apples benchmark.
+
+    \item \textbf{Documentation drift.} Some older markdown files report slightly different summary statistics from the saved CSVs. Where this occurred, the paper prioritizes direct artifact values and explicitly notes when evaluation conventions differ.
+
+    \item \textbf{Missing requested baselines.} ARDL and DMI-style benchmarks were requested conceptually, but no reproducible saved artifacts for those methods were found in the repository snapshot. They are therefore discussed only as absent baselines, not as reported empirical results.
+
+    \item \textbf{Limited stable windows for some branches.} Phase-B/Phase-C and several GARCH-related analyses are effectively 2025 experiments. TEPC strict raw-GDELT runs are currently tied to local raw news coverage availability.
+
+    \item \textbf{LLM reproducibility.} The Gemini and later multi-provider persona branches depend on external model APIs and prompting behavior, which are more reproducible than free-form qualitative use but still less stable than fully local numeric pipelines.
+
+    \item \textbf{No transaction-cost model.} The repository studies predictability, regime detection, and risk. It does not yet include execution slippage, spread costs, or treasury workflow constraints needed for deployment.
 \end{itemize}
 
 % ============================================================
-% ACKNOWLEDGEMENTS
+% 9. CONCLUSION
 % ============================================================
-\section*{Acknowledgements}
+\section{Conclusion}
 
-We acknowledge the GDELT Project for providing comprehensive global news data, the European Central Bank (via Frankfurter API) for exchange rate data, FRED for macroeconomic indicators, and the open-source Python community for core libraries (pandas, scikit-learn, XGBoost, vmdpy, arch). This research was conducted as part of the BITS F471 course project at BITS Pilani.
+This paper documents the full repository as a single evolving research program on USD/INR forecasting. The overarching conclusion is not that one final model ``solves'' FX prediction. It is that different layers of the market are predictable with different tools. The early phases show that decomposed volatility and lagged thematic sentiment contain usable delayed structure. The GARCH and ensemble branches show that many direct price models fail, and that simple momentum plus a small amount of structured signal is often stronger than heavyweight architectures. Gemini V4 demonstrates that debiased persona-based LLM forecasting can help as a bounded overlay. The \texttt{final phase} stack shows that compressed market memory can outperform richer feature blends under honest walk-forward evaluation. TEPC finally shows that topology and chaos are not cosmetic additions; under strict lagged timing they become genuinely informative breakout and regime features.
 
-\textbf{AI Use Disclaimer:} The authors are responsible for all content, facts, and claims presented in this paper. Google Gemini AI was used as a component of the prediction system under study, not for writing the paper. All scientific analysis and conclusions are the authors' own.
+If the repository has a single scientific message, it is this: the ``new generation'' of prediction systems for USD/INR is not one more large model. It is a layered methodology that combines decomposition, event filtering, calibrated state representation, and network-aware dynamics, while remaining skeptical of any method that wins only by copying the last price.
+
+% ============================================================
+% APPENDIX
+% ============================================================
+\appendix
+
+\section{Feature and Node Inventory}
+\label{app:features}
+
+\subsection{Phase-B Feature Groups}
+
+The early signal pipeline uses 16 daily base features:
+\begin{itemize}[leftmargin=*]
+    \item tone: \texttt{Tone\_Economy}, \texttt{Tone\_Conflict}, \texttt{Tone\_Policy}, \texttt{Tone\_Corporate}, \texttt{Tone\_Overall};
+    \item Goldstein: \texttt{Goldstein\_Avg}, \texttt{Goldstein\_Weighted};
+    \item counts: theme-level counts and total count;
+    \item spikes: \texttt{Volume\_Spike}, \texttt{Volume\_Spike\_Economy}, \texttt{Volume\_Spike\_Conflict}.
+\end{itemize}
+Each base feature is later lagged 1--5 days, producing an 80-dimensional feature space for Phase C.
+
+\subsection{\texttt{final phase} Feature Groups}
+
+The saved feature builder in \texttt{final phase/final\_phase/features.py} constructs seven feature groups:
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{technical}: multi-horizon returns, volatility, trend spread, z-score, range position, drawdown, momentum stability;
+    \item \textbf{macro}: oil, gold, US10Y, DXY returns and z-scores, plus derived pressure terms;
+    \item \textbf{master sentiment}: rolling India and US tone, panic, stability, mention spikes, and cross-stress variables;
+    \item \textbf{goldstein}: India/US Goldstein means, differences, weighted averages, event pressure;
+    \item \textbf{thematic}: rolling theme tone blocks, weighted Goldstein log, theme conflict spike, log total count;
+    \item \textbf{political}: rolling political Goldstein/tone means, article and mention intensity, event spikes;
+    \item \textbf{memory}: macro pressure, sentiment pressure, event heat, volatility stress, carry pressure, reversal pressure, regime score.
+\end{enumerate}
+
+\subsection{TEPC Node Universe}
+
+The local TEPC node universe contains direct and composite nodes:
+\begin{itemize}[leftmargin=*]
+    \item direct market nodes: INRUSD, DXY, BRENT, GOLD, US10Y;
+    \item composite sentiment/geopolitical nodes: INDIA\_SENTIMENT, US\_SENTIMENT, GOLDSTEIN\_SPREAD, GEO\_RISK, THEME\_PRESSURE;
+    \item optional live or cross-FX nodes when coverage permits: EURUSD, GBPINR, USDCNH, CNHUSD, LIVE\_INDIA\_FX\_NEWS, LIVE\_USD\_MACRO\_NEWS, LIVE\_GEO\_RISK.
+\end{itemize}
+
+\section{Additional Figure Gallery}
+\label{app:figures}
+
+\begin{figure*}[p]
+\centering
+\begin{subfigure}[t]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{ensemble_ultimate_dashboard.png}
+    \caption{Ultimate ensemble dashboard.}
+\end{subfigure}
+\hfill
+\begin{subfigure}[t]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{monte_carlo_results.png}
+    \caption{Full Monte Carlo results panel.}
+\end{subfigure}
+\caption{Additional quantitative branch diagnostics.}
+\end{figure*}
+
+\begin{figure*}[p]
+\centering
+\begin{subfigure}[t]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{final_phase_dashboard_100d.png}
+    \caption{\texttt{final phase} 100-day dashboard.}
+\end{subfigure}
+\hfill
+\begin{subfigure}[t]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{final_phase_predictions_100d.png}
+    \caption{Top 100-day prediction overlays.}
+\end{subfigure}
+\caption{Additional \texttt{final phase} plots.}
+\end{figure*}
+
+\begin{figure*}[p]
+\centering
+\begin{subfigure}[t]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{final_phase_rolling_100d.png}
+    \caption{Rolling absolute error over 100 days.}
+\end{subfigure}
+\hfill
+\begin{subfigure}[t]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{final_phase_persona_weight.png}
+    \caption{Persona weight versus error relationship.}
+\end{subfigure}
+\caption{Late-stage diagnostics from the market-memory branch.}
+\end{figure*}
+
+\begin{figure*}[p]
+\centering
+\begin{subfigure}[t]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{tepc_compare_leaderboard.png}
+    \caption{TEPC cross-run leaderboard.}
+\end{subfigure}
+\hfill
+\begin{subfigure}[t]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{tepc_compare_pareto.png}
+    \caption{TEPC cross-run Pareto comparison.}
+\end{subfigure}
+\caption{Additional TEPC comparison plots across strict raw and persona-overlay runs.}
+\end{figure*}
+
+\begin{figure*}[p]
+\centering
+\begin{subfigure}[t]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{gemini_v4_jan_llm.png}
+    \caption{Gemini January 2026 LLM analysis panel.}
+\end{subfigure}
+\hfill
+\begin{subfigure}[t]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{tepc_strict_rolling_error.png}
+    \caption{TEPC strict rolling absolute error comparison.}
+\end{subfigure}
+\caption{Additional diagnostics for the LLM and topology-chaos branches.}
+\end{figure*}
 
 % ============================================================
 % REFERENCES
@@ -1035,92 +1146,5 @@ FinBen: A financial benchmark for large language models.
 \textit{arXiv preprint arXiv:2310.xxxxx}.
 
 \end{thebibliography}
-
-% ============================================================
-% APPENDIX
-% ============================================================
-\appendix
-
-\section{Complete Feature List}
-\label{app:features}
-
-\subsection{Original GDELT Fields (Selected)}
-
-\begin{enumerate}
-    \item \texttt{GLOBALEVENTID}: Unique event identifier
-    \item \texttt{SQLDATE}: Publication date (YYYYMMDD)
-    \item \texttt{Actor1Name}, \texttt{Actor2Name}: Entities involved
-    \item \texttt{EventCode}: CAMEO event classification
-    \item \texttt{GoldsteinScale}: Conflict-cooperation score ($-10$ to $+10$)
-    \item \texttt{AvgTone}: Sentiment score ($-100$ to $+100$)
-    \item \texttt{NumMentions}: Number of times event mentioned
-    \item \texttt{NumArticles}: Number of source articles
-    \item \texttt{SOURCEURL}: Article URL
-\end{enumerate}
-
-\subsection{Engineered Features (Phase B)}
-
-\textbf{Sentiment features (5):} $\text{Tone}_\text{Economy}$, $\text{Tone}_\text{Conflict}$, $\text{Tone}_\text{Policy}$, $\text{Tone}_\text{Corporate}$, $\text{Tone}_\text{Overall}$.
-
-\textbf{Goldstein features (2):} $\text{Goldstein}_{\text{Avg}}$ (mean), $\text{Goldstein}_{\text{Wtd}}$ ($\sum \text{Goldstein}_i \times \text{Mentions}_i$).
-
-\textbf{Volume features (6):} $\text{Count}_\text{Economy}$, $\text{Count}_\text{Conflict}$, $\text{Count}_\text{Policy}$, $\text{Count}_\text{Corporate}$, $\text{Count}_\text{Total}$.
-
-\textbf{Volume spike features (3):} $\text{Volume\_Spike}$, $\text{Volume\_Spike}_\text{Economy}$, $\text{Volume\_Spike}_\text{Conflict}$.
-
-\textbf{Lagged features (80 total):} Each of the 16 base features $\times$ 5 lags (1--5 days).
-
-\section{EGARCH + XGBoost Feature Importances}
-\label{app:egarch}
-
-\begin{table}[t]
-\centering
-\small
-\caption{Top 10 Features in Hybrid EGARCH + XGBoost Model.}
-\begin{tabular}{lc}
-\toprule
-\textbf{Feature} & \textbf{Importance (\%)} \\
-\midrule
-Realized\_Vol\_20d & 27.5 \\
-India\_Avg\_Goldstein & 15.8 \\
-USD Trade Index (DTWEXBGS) & 9.6 \\
-Goldstein\_Avg & 8.2 \\
-Oil Price (DCOILWTICO) & 6.2 \\
-Goldstein\_Weighted & 4.4 \\
-10Y Treasury (DGS10) & 4.3 \\
-USA\_India\_Sentiment\_Diff & 4.1 \\
-USA\_Avg\_Goldstein & 3.7 \\
-Panic\_Magnitude & 3.6 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\section{Project Statistics}
-\label{app:stats}
-
-\begin{table}[t]
-\centering
-\small
-\caption{Overall Project Statistics.}
-\begin{tabular}{ll}
-\toprule
-\textbf{Metric} & \textbf{Value} \\
-\midrule
-GDELT articles analyzed & 2,546,999 (India) + $\sim$5M (USA) \\
-Exchange rate observations & 256 daily \\
-Date range & January 2025 -- January 2026 \\
-Features engineered & 16 base + 80 lagged \\
-Training samples & 290 days \\
-Test samples & 72 days \\
-Best classification F1 & 0.45 \\
-Danger day precision & 40\% \\
-Directional accuracy & 41.2\% \\
-Lead time discovered & 9--12 days \\
-Monte Carlo simulations & 10,000 paths \\
-Gemini personas & 9 \\
-Total models tested & 15+ \\
-\bottomrule
-\end{tabular}
-\end{table}
 
 \end{document}

@@ -183,6 +183,59 @@ Interpretation to remember:
 - the raw daily GDELT panel is dense enough to keep all three live news nodes
   in the final graph
 
+## Persona Overlay
+
+TEPC now has a deterministic multi-persona overlay in `TEPC/tepc/personas.py`.
+
+Current personas:
+
+- Dollar Rates Trader
+- Oil Shock Analyst
+- India News Analyst
+- Global Risk Sentinel
+- Cross-FX Relative Value
+- Topology Synchronization Analyst
+- Chaos Regime Analyst
+
+Important implementation details:
+
+- this is rule-based, not LLM-based
+- personas read a structured TEPC market memory snapshot
+- calibration updates are delayed until the target date has matured
+- the current voting gate suppresses small implied moves, so the committee
+  often abstains and predicts `range`
+
+## Latest Persona Run
+
+Run directory:
+
+- `TEPC/outputs/strict_persona_v3_2025_80d/`
+
+Metrics:
+
+1. `tepc_full`
+   - breakout accuracy: `0.775`
+   - macro F1: `0.33701`
+   - MAE return: `0.0027458`
+2. `persona_rule_only`
+   - breakout accuracy: `0.8000`
+   - macro F1: `0.29630`
+   - MAE return: `0.0028864`
+3. `tepc_persona_blend`
+   - breakout accuracy: `0.7875`
+   - macro F1: `0.29371`
+   - MAE return: `0.0026946`
+
+Interpretation to remember:
+
+- `persona_rule_only` is currently an abstaining committee that predicts
+  `range` on all 80 test days
+- because the strict 2-day-lag dataset is range-heavy, that gives high raw
+  breakout accuracy but weak macro F1
+- `tepc_persona_blend` improves raw accuracy and MAE over `tepc_full`
+- `tepc_full` still ranks first under the existing macro-F1-first leaderboard
+  rule
+
 ## Latest 100-Day Backtest
 
 Run directory:

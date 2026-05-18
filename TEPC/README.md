@@ -80,6 +80,8 @@ It is the correct engineering compromise for a fast, inspectable first version.
 - `chaos_only`
 - `topology_chaos`
 - `tepc_full`
+- `persona_rule_only`
+- `tepc_persona_blend`
 
 These are meant to answer:
 
@@ -87,6 +89,26 @@ These are meant to answer:
 - does topology add signal?
 - does chaos synchronization add signal?
 - does the full TEPC blend beat simpler baselines?
+- does a deterministic multi-persona committee help as an abstaining overlay?
+
+## Multi-Persona Layer
+
+TEPC now includes a rule-based multi-agent committee with these personas:
+
+- Dollar Rates Trader
+- Oil Shock Analyst
+- India News Analyst
+- Global Risk Sentinel
+- Cross-FX Relative Value
+- Topology Synchronization Analyst
+- Chaos Regime Analyst
+
+This layer does not use an LLM. It reads the structured TEPC memory snapshot,
+forms persona votes, delays calibration updates until each vote's target date
+has matured, and can be run either:
+
+- on its own via `persona_rule_only`
+- or as a blend with the full TEPC model via `tepc_persona_blend`
 
 ## Outputs
 
@@ -175,6 +197,31 @@ Example:
 python "TEPC\plot_results.py" `
   --run-dir "TEPC\outputs\livepull_100d"
 ```
+
+## Current Persona Result Snapshot
+
+Strict 2025 raw-GDELT run with persona overlay:
+
+- output dir:
+  - `TEPC/outputs/strict_persona_v3_2025_80d/`
+- `tepc_full`
+  - breakout accuracy: `0.775`
+  - macro F1: `0.3370`
+  - MAE return: `0.0027458`
+- `tepc_persona_blend`
+  - breakout accuracy: `0.7875`
+  - macro F1: `0.2937`
+  - MAE return: `0.0026946`
+- `persona_rule_only`
+  - breakout accuracy: `0.8000`
+  - macro F1: `0.2963`
+  - MAE return: `0.0028864`
+
+Interpretation:
+
+- the current persona committee behaves mostly as an abstaining `range` overlay
+- that improves raw accuracy and return MAE in the current range-heavy regime
+- it does not currently improve macro F1 over `tepc_full`
 
 ## Default Interpretation
 

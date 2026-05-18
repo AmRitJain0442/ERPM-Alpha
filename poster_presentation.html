@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>USD/INR Poster Presentation</title>
+    <style>
+        @page {
+            size: A4 portrait;
+            margin: 0;
+        }
+
+        :root {
+            --ink: #17324d;
+            --muted: #5f6f82;
+            --line: #d7e0ea;
+            --panel: #f7fafc;
+            --blue: #0d6ea6;
+            --teal: #13857b;
+            --orange: #dd7a2f;
+            --red: #b24d57;
+            --navy: #0f1f33;
+            --gold: #f0c25c;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            margin: 0;
+            background: white;
+            color: var(--ink);
+            font-family: "Aptos", "Segoe UI", sans-serif;
+        }
+
+        body {
+            width: 210mm;
+            height: 294mm;
+            overflow: hidden;
+        }
+
+        .poster {
+            width: 210mm;
+            height: 294mm;
+            padding: 8mm 9mm 6mm;
+            display: grid;
+            grid-template-rows: auto auto auto repeat(3, minmax(0, 1fr)) auto;
+            gap: 3.2mm;
+            background:
+                radial-gradient(circle at top right, rgba(13, 110, 166, 0.10), transparent 28%),
+                radial-gradient(circle at bottom left, rgba(19, 133, 123, 0.10), transparent 24%),
+                white;
+        }
+
+        .header {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 5mm;
+            align-items: start;
+            border-bottom: 1.4mm solid var(--ink);
+            padding-bottom: 2.4mm;
+        }
+
+        .eyebrow {
+            font-size: 8pt;
+            font-weight: 700;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: var(--blue);
+            margin-bottom: 1.4mm;
+        }
+
+        h1 {
+            margin: 0;
+            font-family: "Cambria", "Georgia", serif;
+            font-size: 19pt;
+            line-height: 1.08;
+            letter-spacing: -0.02em;
+            color: var(--navy);
+        }
+
+        .subtitle {
+            margin-top: 1.8mm;
+            font-size: 7.8pt;
+            line-height: 1.34;
+            color: var(--muted);
+            max-width: 135mm;
+        }
+
+        .badge-stack {
+            display: grid;
+            gap: 2.4mm;
+            align-content: start;
+        }
+
+        .badge {
+            border: 0.45mm solid var(--line);
+            background: white;
+            padding: 2.4mm 3mm;
+            border-radius: 3mm;
+            min-width: 42mm;
+            box-shadow: 0 1.2mm 2.4mm rgba(15, 31, 51, 0.05);
+        }
+
+        .badge .label {
+            display: block;
+            font-size: 6.6pt;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--muted);
+            margin-bottom: 0.8mm;
+        }
+
+        .badge .value {
+            display: block;
+            font-size: 8.8pt;
+            font-weight: 700;
+            color: var(--navy);
+            line-height: 1.22;
+        }
+
+        .flow {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 2mm;
+        }
+
+        .flow-step {
+            position: relative;
+            padding: 2.4mm 2mm;
+            border-radius: 3mm;
+            border: 0.35mm solid var(--line);
+            background: linear-gradient(180deg, #ffffff, #f6f9fb);
+            text-align: center;
+            font-size: 6.9pt;
+            line-height: 1.28;
+            font-weight: 700;
+        }
+
+        .flow-step:not(:last-child)::after {
+            content: ">";
+            position: absolute;
+            right: -1.7mm;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 11pt;
+            color: var(--orange);
+            font-weight: 700;
+            z-index: 2;
+        }
+
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2.2mm;
+        }
+
+        .stat {
+            border-radius: 3mm;
+            padding: 2.5mm 3mm;
+            color: white;
+            min-height: 15mm;
+            box-shadow: 0 1.2mm 2.6mm rgba(15, 31, 51, 0.09);
+        }
+
+        .stat:nth-child(1) { background: linear-gradient(135deg, var(--blue), #1d86c4); }
+        .stat:nth-child(2) { background: linear-gradient(135deg, var(--teal), #17a497); }
+        .stat:nth-child(3) { background: linear-gradient(135deg, var(--orange), #ef9753); }
+        .stat:nth-child(4) { background: linear-gradient(135deg, var(--red), #cd6470); }
+
+        .stat .kicker {
+            font-size: 6.5pt;
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
+            opacity: 0.9;
+        }
+
+        .stat .big {
+            display: block;
+            margin-top: 0.8mm;
+            font-size: 10.8pt;
+            font-weight: 800;
+            line-height: 1.04;
+        }
+
+        .stat .note {
+            display: block;
+            margin-top: 0.8mm;
+            font-size: 6.4pt;
+            line-height: 1.22;
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3.2mm;
+            min-height: 0;
+        }
+
+        .card {
+            min-height: 0;
+            padding: 2.7mm;
+            border: 0.4mm solid var(--line);
+            border-radius: 3.5mm;
+            background: rgba(255, 255, 255, 0.96);
+            box-shadow: 0 1.2mm 3mm rgba(15, 31, 51, 0.05);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 1.8mm;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 2mm;
+        }
+
+        .card-tag {
+            display: inline-block;
+            font-size: 6.5pt;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
+            color: var(--blue);
+        }
+
+        .card h2 {
+            margin: 0.5mm 0 0;
+            font-size: 10.2pt;
+            line-height: 1.12;
+            font-family: "Cambria", "Georgia", serif;
+            color: var(--navy);
+        }
+
+        .card p,
+        .card li {
+            font-size: 6.55pt;
+            line-height: 1.28;
+        }
+
+        .card ul {
+            margin: 0;
+            padding-left: 4.5mm;
+        }
+
+        .compact-list li + li {
+            margin-top: 0.8mm;
+        }
+
+        .split {
+            display: grid;
+            grid-template-columns: 1fr 0.9fr;
+            gap: 2.2mm;
+            min-height: 0;
+        }
+
+        .visual {
+            min-height: 0;
+            border: 0.35mm solid #e5ebf2;
+            border-radius: 2.6mm;
+            background: #fbfdff;
+            padding: 1.3mm;
+        }
+
+        .visual img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+
+        .h-21 { height: 21mm; }
+        .h-23 { height: 23mm; }
+        .h-25 { height: 25mm; }
+        .h-28 { height: 28mm; }
+
+        .double-visual {
+            display: grid;
+            grid-template-columns: 1fr 0.82fr;
+            gap: 1.6mm;
+            min-height: 0;
+        }
+
+        .table-wrap {
+            border: 0.35mm solid #e5ebf2;
+            border-radius: 2.6mm;
+            overflow: hidden;
+            background: white;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 5.9pt;
+            line-height: 1.2;
+        }
+
+        th {
+            background: #edf4fa;
+            color: var(--navy);
+            font-weight: 800;
+            text-align: left;
+            padding: 1.6mm 1.4mm;
+            border-bottom: 0.35mm solid #d6e0ea;
+            line-height: 1.18;
+        }
+
+        td {
+            padding: 1.5mm 1.4mm;
+            border-bottom: 0.25mm solid #edf2f7;
+            vertical-align: top;
+        }
+
+        .table-title {
+            padding: 1.2mm 1.4mm;
+            background: #f5f9fc;
+            border-bottom: 0.3mm solid #dfe8f1;
+            color: var(--blue);
+            font-size: 6.2pt;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        tr:last-child td {
+            border-bottom: 0;
+        }
+
+        .tiny-note {
+            margin-top: 0.8mm;
+            font-size: 5.85pt;
+            line-height: 1.22;
+            color: var(--muted);
+        }
+
+        .callout {
+            background: #f3f8fc;
+            border-left: 1mm solid var(--gold);
+            border-radius: 2.2mm;
+            padding: 1.5mm 1.8mm;
+            font-size: 6.2pt;
+            line-height: 1.26;
+        }
+
+        .footer {
+            display: block;
+            align-items: end;
+            border-top: 0.8mm solid var(--line);
+            padding-top: 1.6mm;
+            font-size: 6pt;
+            line-height: 1.2;
+            color: var(--muted);
+        }
+
+        .footer strong {
+            color: var(--navy);
+        }
+
+        .footer-note {
+            margin-top: 0.8mm;
+        }
+    </style>
+</head>
+<body>
+    <main class="poster">
+        <section class="header">
+            <div>
+                <div class="eyebrow">Poster Presentation</div>
+                <h1>Forecasting USD/INR in the Indian Market with VMD, GDELT Agents, Monte Carlo, and TEPC</h1>
+                <div class="subtitle">
+                    Repository summary of how the project moved from raw news signals toward bounded LLM overlays,
+                    market-memory systems, and topology-enabled predictions from chaos.
+                </div>
+            </div>
+
+            <div class="badge-stack">
+                <div class="badge">
+                    <span class="label">Course In Charge</span>
+                    <span class="value">Dhruv Kumar</span>
+                </div>
+                <div class="badge">
+                    <span class="label">Poster Format</span>
+                    <span class="value">A4 Portrait</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="flow">
+            <div class="flow-step">Problem in Indian FX Market</div>
+            <div class="flow-step">VMD + Statistical Signal Recovery</div>
+            <div class="flow-step">Monte Carlo Randomness Check</div>
+            <div class="flow-step">GDELT Multi-Agent LLMs</div>
+            <div class="flow-step">TEPC on Chaotic Data</div>
+            <div class="flow-step">TEPC + LLM Hybrid Direction</div>
+        </section>
+
+        <section class="summary">
+            <div class="stat">
+                <span class="kicker">Raw Market Signal</span>
+                <span class="big">0.010</span>
+                <span class="note">Goldstein vs IMF3 is almost zero before feature engineering.</span>
+            </div>
+            <div class="stat">
+                <span class="kicker">Recovered Signal</span>
+                <span class="big">-0.147</span>
+                <span class="note">Theme-filtered Tone_Economy recovers useful structure.</span>
+            </div>
+            <div class="stat">
+                <span class="kicker">V4 LLM Result</span>
+                <span class="big">64.17%</span>
+                <span class="note">Gemini V4 direction accuracy on 240 hybrid days.</span>
+            </div>
+            <div class="stat">
+                <span class="kicker">TEPC Result</span>
+                <span class="big">77.5%</span>
+                <span class="note">Strict TEPC breakout accuracy; macro-F1 = 0.337.</span>
+            </div>
+        </section>
+
+        <section class="row">
+            <article class="card">
+                <div class="card-header">
+                    <div>
+                        <div class="card-tag">1. Problem</div>
+                        <h2>Why the Indian Market Is Hard to Predict</h2>
+                    </div>
+                </div>
+                <div class="split">
+                    <div>
+                        <ul class="compact-list">
+                            <li>USD/INR is a managed-float market shaped by RBI intervention, oil shocks, dollar cycles, and delayed news absorption.</li>
+                            <li>Raw sentiment is weak: Goldstein vs IMF3 = <strong>0.010</strong>; US average tone vs USD/INR = <strong>0.164</strong>.</li>
+                            <li>Delayed effects still appear: Goldstein peaks at <strong>9 days</strong> and tone at <strong>12 days</strong>.</li>
+                        </ul>
+                    </div>
+                    <div class="visual h-25">
+                        <img src="paper_assets/phase_b_heatmap.png" alt="Phase-B heatmap">
+                    </div>
+                </div>
+                <div class="callout">
+                    Key insight: the market looks random in raw aggregates, but delayed and theme-specific structure appears after filtering.
+                </div>
+            </article>
+
+            <article class="card">
+                <div class="card-header">
+                    <div>
+                        <div class="card-tag">2. VMD + Stats</div>
+                        <h2>VMD Reframes the Task from Price to Volatility</h2>
+                    </div>
+                </div>
+                <div class="double-visual">
+                    <div class="visual h-23">
+                        <img src="paper_assets/ensemble_vmd_decomposition.png" alt="VMD decomposition">
+                    </div>
+                    <div class="visual h-23">
+                        <img src="paper_assets/phase_c_classifier.png" alt="Phase-C classifier">
+                    </div>
+                </div>
+                <ul class="compact-list">
+                    <li>Three-mode VMD targets <strong>IMF3</strong>, the high-frequency and news-sensitive part of USD/INR.</li>
+                    <li>Phase B uses four themes: <strong>Economy</strong>, <strong>Conflict</strong>, <strong>Policy</strong>, <strong>Corporate</strong>.</li>
+                    <li><strong>Tone_Economy = -0.147</strong> with IMF3; the Phase-C danger-day classifier reaches <strong>40% precision</strong> and <strong>52% recall</strong>.</li>
+                </ul>
+            </article>
+        </section>
+
+        <section class="row">
+            <article class="card">
+                <div class="card-header">
+                    <div>
+                        <div class="card-tag">3. Monte Carlo</div>
+                        <h2>Monte Carlo Supports a Noise-Dominant Market View</h2>
+                    </div>
+                </div>
+                <div class="visual h-28">
+                    <img src="paper_assets/monte_carlo_weekly.png" alt="Monte Carlo weekly forecast">
+                </div>
+                <ul class="compact-list">
+                    <li>Monte Carlo is most useful as a <strong>distributional risk engine</strong>, not a single-point predictor.</li>
+                    <li>Regime switching is the most balanced 30-day setup: median <strong>90.370</strong>, std <strong>1.336</strong>, 5th to 95th percentile <strong>88.232 to 92.618</strong>.</li>
+                </ul>
+            </article>
+
+            <article class="card">
+                <div class="card-header">
+                    <div>
+                        <div class="card-tag">4. GDELT Agents</div>
+                        <h2>Multi-Agent LLMs Work Only as Bounded Overlays</h2>
+                    </div>
+                </div>
+                <div class="split">
+                    <div class="visual h-21">
+                        <img src="paper_assets/gemini_v4_comparison.png" alt="Gemini V4 comparison">
+                    </div>
+                    <div class="table-wrap">
+                        <div class="table-title">V4 Accuracy Table</div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Model</th>
+                                    <th>Days</th>
+                                    <th>MAE</th>
+                                    <th>Dir.</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>V3 hybrid</td>
+                                    <td>240</td>
+                                    <td>0.2741%</td>
+                                    <td>61.25%</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>V4 hybrid</strong></td>
+                                    <td>240</td>
+                                    <td><strong>0.2695%</strong></td>
+                                    <td><strong>64.17%</strong></td>
+                                </tr>
+                                <tr>
+                                    <td>V4 Jan live</td>
+                                    <td>21</td>
+                                    <td>0.3216%</td>
+                                    <td>57.14%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="tiny-note">
+                    Debiasing mattered: symmetric prompting, randomized direction order, adaptive weights, and persona accountability improved V4 over V3.
+                </div>
+            </article>
+        </section>
+
+        <section class="row">
+            <article class="card">
+                <div class="card-header">
+                    <div>
+                        <div class="card-tag">5. TEPC</div>
+                        <h2>Most Recent Research: Topology-Enabled Predictions from Chaos</h2>
+                    </div>
+                </div>
+                <div class="visual h-23">
+                    <img src="paper_assets/tepc_strict_metric_bars.png" alt="TEPC strict metrics">
+                </div>
+                <ul class="compact-list">
+                    <li>TEPC treats USD/INR as one node in a macro-geopolitical network containing DXY, BRENT, GOLD, rates, sentiment, and Goldstein pressure.</li>
+                    <li>Rolling correlations define the graph; Laplacian summaries and coupled Lorenz chaos features become predictors.</li>
+                    <li><strong>tepc_full</strong> wins the strict raw-GDELT run: <strong>77.5% breakout accuracy</strong>, <strong>0.337 macro-F1</strong>, <strong>0.002746 MAE return</strong>. Live runs also show <strong>chaos_only = 80%</strong> breakout accuracy.</li>
+                </ul>
+            </article>
+
+            <article class="card">
+                <div class="card-header">
+                    <div>
+                        <div class="card-tag">6. Hybrid Takeaway</div>
+                        <h2>TEPC + LLMs for the Win Means Structured State + Controlled Reasoning</h2>
+                    </div>
+                </div>
+                <div class="split">
+                    <div class="visual h-21">
+                        <img src="paper_assets/final_phase_dashboard_100d.png" alt="Final phase dashboard">
+                    </div>
+                    <div class="table-wrap">
+                        <div class="table-title">TEPC / LLM Accuracy Table</div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Model</th>
+                                    <th>Window</th>
+                                    <th>Acc.</th>
+                                    <th>Error</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Memory-only state</td>
+                                    <td>100d</td>
+                                    <td>61.0% dir.</td>
+                                    <td>0.2421 price</td>
+                                </tr>
+                                <tr>
+                                    <td>Gemini 2.5 personas</td>
+                                    <td>100d</td>
+                                    <td>58.0% dir.</td>
+                                    <td>0.2726 price</td>
+                                </tr>
+                                <tr>
+                                    <td>TEPC full</td>
+                                    <td>80d</td>
+                                    <td>77.5% breakout</td>
+                                    <td>0.002746 return</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>TEPC persona blend</strong></td>
+                                    <td>80d</td>
+                                    <td><strong>78.75% breakout</strong></td>
+                                    <td><strong>0.002695 return</strong></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="tiny-note">
+                    LLMs help most when they consume structured market memory, and TEPC adds nonlinear regime signal on top of that state.
+                </div>
+            </article>
+        </section>
+
+        <section class="footer">
+            <div>
+                <strong>Final Message:</strong> the Indian FX market is not solved by a bigger black-box model.
+                The strongest repo path is a layered pipeline:
+                <strong>VMD + thematic GDELT filtering + probabilistic checks + bounded multi-agent reasoning + TEPC topology/chaos features.</strong>
+            </div>
+            <div class="footer-note">Source: repo plots, run summaries, and research paper artifacts.</div>
+        </section>
+    </main>
+</body>
+</html>
